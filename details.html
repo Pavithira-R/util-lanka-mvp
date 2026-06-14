@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asset Details | Util Lanka</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Specific styles for details page */
+    .details-page-wrapper {
+      padding: 7rem 0 3rem 0;
+      background-color: var(--bg-white);
+    }
+
+    .detail-nav-back {
+      margin-bottom: 1.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-light);
+      transition: var(--transition-fast);
+    }
+
+    .detail-nav-back:hover {
+      color: var(--primary-dark);
+      transform: translateX(-3px);
+    }
+
+    .details-header {
+      margin-bottom: 2rem;
+    }
+
+    .details-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .details-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+    }
+
+    .details-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .details-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .details-meta-item svg {
+      color: var(--text-light);
+    }
+
+    .details-rating {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .details-rating span {
+      color: #F59E0B;
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    .details-address {
+      font-weight: 500;
+    }
+
+    .badges-wrapper {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
+
+    /* Airbnb-style Grid Gallery */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 0.75rem;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: 2.5rem;
+      height: 400px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .gallery-main {
+      position: relative;
+      height: 100%;
+    }
+
+    .gallery-main img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: var(--transition-normal);
+    }
+
+    .gallery-side {
+      display: grid;
+      grid-template-rows: 1fr 1fr;
+      gap: 0.75rem;
+      height: 100%;
+    }
+
+    .gallery-side-img-wrapper {
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .gallery-side img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: var(--transition-normal);
+    }
+
+    .gallery-main img:hover,
+    .gallery-side img:hover {
+      transform: scale(1.02);
+    }
+
+    /* Column Layout Split */
+    .details-split-layout {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 3rem;
+      align-items: flex-start;
+    }
+
+    /* Left Column Styling */
+    .details-left-col {
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+    }
+
+    .details-divider {
+      height: 1px;
+      background-color: var(--border-light);
+      width: 100%;
+    }
+
+    /* Host Card */
+    .host-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--bg-light);
+      border: 1px solid var(--border-light);
+      padding: 1.5rem;
+      border-radius: var(--radius-md);
+    }
+
+    .host-info-left {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .host-avatar {
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: var(--radius-full);
+      background-color: var(--primary-dark);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .host-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin-bottom: 0.15rem;
+    }
+
+    .host-joined {
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+
+    .host-inquiry-details {
+      text-align: right;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .host-inquiry-details p {
+      margin-bottom: 0.25rem;
+    }
+
+    /* Description */
+    .section-title {
+      font-size: 1.35rem;
+      margin-bottom: 1rem;
+      color: var(--primary-dark);
+      position: relative;
+    }
+
+    .asset-desc-text {
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* Specs Cards Grid */
+    .specs-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+
+    .spec-card {
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      background-color: var(--bg-light);
+    }
+
+    .spec-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-light);
+      letter-spacing: 0.05em;
+    }
+
+    .spec-value {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    /* Features List */
+    .amenities-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .amenity-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .amenity-icon-box {
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: var(--radius-sm);
+      background-color: var(--accent-teal-light);
+      color: var(--accent-teal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Map Mockup */
+    .map-mockup-container {
+      width: 100%;
+      height: 250px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border-light);
+      position: relative;
+      background-color: #E2E8F0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .map-placeholder-bg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, #CBD5E1 10%, #E2E8F0 60%);
+      opacity: 0.8;
+    }
+
+    .map-road {
+      position: absolute;
+      background-color: #F1F5F9;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .map-road.vertical {
+      width: 40px;
+      height: 100%;
+      left: 45%;
+    }
+
+    .map-road.horizontal {
+      width: 100%;
+      height: 35px;
+      top: 50%;
+    }
+
+    .map-pin {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--primary-dark);
+      animation: bounce 2s infinite;
+    }
+
+    .map-pin-label {
+      background-color: var(--primary-dark);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 700;
+      white-space: nowrap;
+      margin-top: 0.25rem;
+      box-shadow: var(--shadow-md);
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* Reviews */
+    .reviews-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .review-item {
+      padding: 1.25rem;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      background-color: var(--bg-white);
+    }
+
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+
+    .review-author-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .review-author-avatar {
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: var(--radius-full);
+      background-color: var(--accent-teal);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .review-author-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .review-date {
+      font-size: 0.75rem;
+      color: var(--text-light);
+    }
+
+    .review-comment {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    /* Right Column Sticky Booking Card */
+    .booking-sidebar-card {
+      background-color: var(--bg-white);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-xl);
+      position: sticky;
+      top: 100px;
+    }
+
+    .booking-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 1rem;
+    }
+
+    .booking-card-price-display {
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+    }
+
+    .booking-card-price-display span {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-light);
+    }
+
+    .booking-card-rating-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .booking-card-rating-meta span.star {
+      color: #F59E0B;
+    }
+
+    .booking-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .booking-date-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .booking-summary-list {
+      background-color: var(--bg-light);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      border: 1px solid var(--border-light);
+      margin-top: 0.5rem;
+    }
+
+    .booking-summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .booking-summary-row.grand-total-row {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      border-top: 1px solid var(--border-light);
+      padding-top: 0.75rem;
+      margin-top: 0.25rem;
+    }
+
+    .trust-footer-note {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-light);
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+    }
+
+    /* Response Modals */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(6, 47, 99, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition-normal);
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background-color: var(--bg-white);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 500px;
+      box-shadow: var(--shadow-xl);
+      overflow: hidden;
+      transform: translateY(20px);
+      transition: transform var(--transition-normal);
+    }
+
+    .modal-overlay.active .modal-card {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      padding: 1.25rem 1.5rem;
+      background-color: var(--bg-light);
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      font-size: 1.15rem;
+      color: var(--primary-dark);
+    }
+
+    .modal-close {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-light);
+      cursor: pointer;
+      line-height: 1;
+      transition: var(--transition-fast);
+    }
+
+    .modal-close:hover {
+      color: var(--primary-dark);
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      background-color: var(--bg-light);
+      border-top: 1px solid var(--border-light);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 992px) {
+      .details-split-layout {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+      }
+      .booking-sidebar-card {
+        position: static;
+        box-shadow: var(--shadow-lg);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .gallery-grid {
+        grid-template-columns: 1fr;
+        height: 250px;
+      }
+      .gallery-side {
+        display: none;
+      }
+      .details-title {
+        font-size: 1.75rem;
+      }
+      .host-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      .host-inquiry-details {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER / NAVBAR -->
+  <header class="header scrolled">
+    <div class="container">
+      <nav class="navbar" aria-label="Main Navigation">
+        <a href="index.html" class="logo-container">
+          <img src="assets/logo.png" class="logo-img" alt="Util Lanka Logo">
+          <span class="logo-text">Util Lanka</span>
+        </a>
+        
+        <ul class="nav-menu">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="marketplace.html" class="nav-link">Browse Assets</a></li>
+          <li><a href="index.html#how-it-works-section" class="nav-link">How it Works</a></li>
+          <li><a href="index.html#trust-section" class="nav-link">Trust & Safety</a></li>
+          <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+        </ul>
+        
+        <div class="nav-actions">
+          <button class="btn btn-outline list-asset-trigger">List an Asset</button>
+          <button class="btn btn-primary list-asset-trigger" style="background-color: var(--primary-dark);">Sign In</button>
+        </div>
+
+        <button class="menu-toggle" id="menu-toggle-btn" aria-label="Open Navigation Menu">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MOBILE MENU DRAWER -->
+  <div class="mobile-menu-drawer" id="mobile-menu">
+    <nav class="mobile-nav-links" aria-label="Mobile Navigation">
+      <a href="index.html" class="mobile-nav-link">Home</a>
+      <a href="marketplace.html" class="mobile-nav-link">Browse Assets</a>
+      <a href="index.html#how-it-works-section" class="mobile-nav-link">How it Works</a>
+      <a href="index.html#trust-section" class="mobile-nav-link">Trust & Safety</a>
+      <a href="dashboard.html" class="mobile-nav-link">Dashboard</a>
+    </nav>
+    <div class="mobile-nav-actions">
+      <button class="btn btn-outline mobile-btn list-asset-trigger">List an Asset</button>
+      <button class="btn btn-primary mobile-btn list-asset-trigger" style="background-color: var(--primary-dark);">Sign In</button>
+    </div>
+  </div>
+
+  <!-- MAIN WRAPPER -->
+  <main class="details-page-wrapper">
+    <div class="container">
+      
+      <!-- Back Navigation Link -->
+      <a href="marketplace.html" class="detail-nav-back">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Back to Marketplace
+      </a>
+
+      <!-- Header Section -->
+      <section class="details-header">
+        <div class="details-title-row">
+          <h1 class="details-title" id="asset-title">Asset Loading...</h1>
+          <span class="badge badge-teal" id="asset-category-badge" style="font-size: 0.85rem; padding: 0.4rem 1rem;">Kitchens</span>
+        </div>
+        
+        <div class="details-meta-row">
+          <div class="details-meta-item details-rating">
+            <span class="star">★</span> <span id="asset-rating-val">0.00</span> <span style="font-size: 0.8rem; font-weight: 400;" id="asset-reviews-count">(0 reviews)</span>
+          </div>
+          <div class="details-meta-item details-address">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span id="asset-address">No. 12, Hospital Road, Jaffna</span>
+          </div>
+        </div>
+
+        <div class="badges-wrapper" id="asset-header-badges">
+          <!-- Dynamically populated labels -->
+        </div>
+      </section>
+
+      <!-- Airbnb Image Gallery -->
+      <section class="gallery-grid">
+        <div class="gallery-main">
+          <img id="gallery-main-img" src="" alt="Main Asset Image">
+        </div>
+        <div class="gallery-side">
+          <div class="gallery-side-img-wrapper">
+            <img id="gallery-thumb-1" src="" alt="Detail View 1">
+          </div>
+          <div class="gallery-side-img-wrapper">
+            <img id="gallery-thumb-2" src="" alt="Detail View 2">
+          </div>
+        </div>
+      </section>
+
+      <!-- Split Layout Columns -->
+      <div class="details-split-layout">
+        
+        <!-- Left details column -->
+        <div class="details-left-col">
+          
+          <!-- Host Profile Card -->
+          <div class="host-card">
+            <div class="host-info-left">
+              <div class="host-avatar" id="host-avatar-initial">S</div>
+              <div>
+                <h3 class="host-name" id="host-name">Hosted by Shalini Alwis</h3>
+                <span class="host-joined" id="host-joined">Joined Oct 2025</span>
+              </div>
+            </div>
+            <div class="host-inquiry-details">
+              <p id="host-response-rate">Response Rate: 100%</p>
+              <p id="host-response-time">Response Time: under 15 mins</p>
+            </div>
+          </div>
+
+          <div class="details-divider"></div>
+
+          <!-- Description Section -->
+          <div>
+            <h3 class="section-title">About this shared asset</h3>
+            <p class="asset-desc-text" id="asset-description">
+              Fully certified, premium commercial kitchen space near Jaffna Teaching Hospital. Features stainless steel prep counters, commercial LP burners, refrigeration units, and wet grinding areas. Ideal for catering startups, home bakers, or delivery brands.
+            </p>
+          </div>
+
+          <div class="details-divider"></div>
+
+          <!-- Specifications Cards -->
+          <div>
+            <h3 class="section-title">Asset Specifications</h3>
+            <div class="specs-cards-grid" id="asset-specs-grid">
+              <!-- Dynamically populated spec cards -->
+            </div>
+          </div>
+
+          <div class="details-divider"></div>
+
+          <!-- Features & Amenities Section -->
+          <div>
+            <h3 class="section-title">Features & Included Amenities</h3>
+            <div class="amenities-grid">
+              
+              <div class="amenity-item">
+                <div class="amenity-icon-box">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 11.08 12 19 9 15"></polyline><path d="M22 4L12 14.01l-3-3"></path></svg>
+                </div>
+                <span>Electricity Included</span>
+              </div>
+
+              <div class="amenity-item">
+                <div class="amenity-icon-box">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 11.08 12 19 9 15"></polyline><path d="M22 4L12 14.01l-3-3"></path></svg>
+                </div>
+                <span>Parking Available</span>
+              </div>
+
+              <div class="amenity-item">
+                <div class="amenity-icon-box">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 11.08 12 19 9 15"></polyline><path d="M22 4L12 14.01l-3-3"></path></svg>
+                </div>
+                <span>24/7 Access</span>
+              </div>
+
+              <div class="amenity-item">
+                <div class="amenity-icon-box">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 11.08 12 19 9 15"></polyline><path d="M22 4L12 14.01l-3-3"></path></svg>
+                </div>
+                <span>Water Supply</span>
+              </div>
+
+              <div class="amenity-item">
+                <div class="amenity-icon-box">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 11.08 12 19 9 15"></polyline><path d="M22 4L12 14.01l-3-3"></path></svg>
+                </div>
+                <span>WiFi Included</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="details-divider"></div>
+
+          <!-- Location Map Mockup Section -->
+          <div>
+            <h3 class="section-title">Sharing Location</h3>
+            <p class="asset-desc-text" style="margin-bottom: 1rem;">
+              Actual coordinates are shared privately upon booking confirmation. Located in safe commercial areas of Northern Province.
+            </p>
+            <div class="map-mockup-container">
+              <div class="map-placeholder-bg"></div>
+              <div class="map-road vertical"></div>
+              <div class="map-road horizontal"></div>
+              <div class="map-pin">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                <div class="map-pin-label">No. 12, Hospital Road, Jaffna</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="details-divider"></div>
+
+          <!-- Reviews Section -->
+          <div>
+            <h3 class="section-title">User Reviews & Ratings</h3>
+            <div class="reviews-list" id="reviews-list-container">
+              <!-- Dynamically populated reviews -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column Booking Card -->
+        <aside class="details-right-col">
+          <div class="booking-sidebar-card">
+            
+            <div class="booking-card-header">
+              <div class="booking-card-price-display">
+                <span id="booking-card-price">LKR 3,500</span><span id="booking-card-unit">/ day</span>
+              </div>
+              <div class="booking-card-rating-meta">
+                <span class="star">★</span> <span id="booking-card-rating">4.9</span> <span style="font-weight: 400; color: var(--text-light);" id="booking-card-reviews">(24)</span>
+              </div>
+            </div>
+
+            <!-- Booking Form -->
+            <form class="booking-form" onsubmit="return false;">
+              
+              <div class="booking-date-grid">
+                <div class="form-group">
+                  <label for="booking-start-date" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">Start Date</label>
+                  <input type="date" id="booking-start-date" class="form-control" style="font-size: 0.85rem;" required>
+                </div>
+                <div class="form-group">
+                  <label for="booking-end-date" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">End Date</label>
+                  <input type="date" id="booking-end-date" class="form-control" style="font-size: 0.85rem;" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="booking-user-name" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">Your Full Name</label>
+                <input type="text" id="booking-user-name" class="form-control" placeholder="e.g. Shalini Alwis" required>
+              </div>
+
+              <div class="form-group">
+                <label for="booking-user-contact" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">Mobile / WhatsApp</label>
+                <input type="tel" id="booking-user-contact" class="form-control" placeholder="e.g. 077 123 4567" required>
+              </div>
+
+              <!-- Price Billing Calculation Summary -->
+              <div class="booking-summary-list">
+                
+                <div class="booking-summary-row">
+                  <span id="summary-duration-label">LKR 3,500 &times; 1 day(s)</span>
+                  <span id="summary-base-total">LKR 3,500</span>
+                </div>
+
+                <div class="booking-summary-row">
+                  <span>Platform Fee (5%)</span>
+                  <span id="summary-platform-fee">LKR 175</span>
+                </div>
+
+                <div class="booking-summary-row">
+                  <span>Refundable Security Deposit (50%)</span>
+                  <span id="summary-deposit">LKR 1,750</span>
+                </div>
+
+                <div class="booking-summary-row grand-total-row">
+                  <span>Estimated Grand Total</span>
+                  <span id="summary-grand-total">LKR 5,425</span>
+                </div>
+
+              </div>
+
+              <button type="submit" id="booking-btn" class="btn btn-primary" style="width: 100%; padding: 0.9rem; font-size: 1rem; border-radius: var(--radius-md); font-weight: 700;">
+                Book Shared Asset
+              </button>
+
+            </form>
+
+            <div class="trust-footer-note">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              No payment charged today. Review within 4h.
+            </div>
+
+          </div>
+        </aside>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col brand">
+          <div class="logo-container" style="margin-bottom: 1.25rem;">
+            <img src="assets/logo.png" class="logo-img" alt="Util Lanka Logo">
+            <span class="logo-text" style="color: var(--bg-white);">Util Lanka</span>
+          </div>
+          <p class="footer-tagline">Unlocking value from underutilized assets across communities in Sri Lanka. Starting with our active pilot launch in Northern Province.</p>
+        </div>
+        
+        <div class="footer-col links">
+          <h4>Platform</h4>
+          <ul>
+            <li><a href="marketplace.html">Browse Assets</a></li>
+            <li><a href="index.html#how-it-works-section">How It Works</a></li>
+            <li><a href="index.html#trust-section">Trust & Safety</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-col links">
+          <h4>Active Locations</h4>
+          <ul>
+            <li><a href="#">Jaffna, Northern Province</a></li>
+            <li><a href="#">Kilinochchi, Northern Province</a></li>
+            <li><a href="#">Vavuniya, Northern Province</a></li>
+            <li><a href="#">Mullaitivu, Northern Province</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-col contact">
+          <h4>Pilot Contact</h4>
+          <p style="margin-bottom: 0.75rem;">Interested in listing tools or commercial spaces in Northern Province? Get in touch with our team today.</p>
+          <p><strong>Email:</strong> support@utillanka.lk</p>
+          <p><strong>Office:</strong> Hospital Road, Jaffna, Sri Lanka</p>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2026 Util Lanka. All Rights Reserved. Designed for local trust and community asset sharing.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 1. BOOKING SUCCESS MODAL -->
+  <div class="modal-overlay" id="booking-success-modal">
+    <div class="modal-card">
+      <div class="modal-header" style="background-color: var(--primary-green); color: white;">
+        <h3 style="color: white; display: flex; align-items: center; gap: 0.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          Booking Requested!
+        </h3>
+        <span class="modal-close" style="color: white;">&times;</span>
+      </div>
+      <div class="modal-body" style="text-align: center; padding: 2rem 1.5rem;">
+        <h4 style="font-size: 1.25rem; color: var(--primary-dark); margin-bottom: 0.5rem;">Availability Check Initiated</h4>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+          We have forwarded your booking request to the host. A verification specialist is checking coordinates and calendar slot availability. We will update you via WhatsApp or Call within 4 hours.
+        </p>
+        
+        <div id="booking-ref-code" style="background-color: var(--bg-light); border: 1px solid var(--border-light); padding: 0.75rem; border-radius: var(--radius-md); font-family: monospace; font-size: 1rem; color: var(--primary-dark); margin-bottom: 1rem;">
+          <strong>Reference ID:</strong> UTL-493202
+        </div>
+        
+        <p style="font-size: 0.8rem; color: var(--text-light);">
+          Please keep this reference code for future communications.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary modal-close" style="background-color: var(--primary-dark);">Got it, thanks!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. LIST ASSET MODAL -->
+  <div class="modal-overlay" id="list-asset-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>List Your Asset</h3>
+        <span class="modal-close" aria-label="Close modal">&times;</span>
+      </div>
+
+      <div class="modal-body">
+        <!-- Form Fields -->
+        <div id="listing-form-content">
+          <p style="color: var(--text-light); font-size: 0.85rem; margin-bottom: 1.5rem;">Fill in the details below. We verify every listing within 4 hours before publishing.</p>
+
+          <form id="modal-listing-form">
+            <div class="form-group">
+              <label for="listing-title-input">Asset Title / Name</label>
+              <input type="text" id="listing-title-input" class="form-control" placeholder="e.g. Commercial Cloud Kitchen Space near Hospital Road" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="listing-category-select">Asset Category</label>
+                <select id="listing-category-select" class="form-control" required>
+                  <option value="kitchens">Kitchens</option>
+                  <option value="vehicles">Vehicles</option>
+                  <option value="equipment">Equipment</option>
+                  <option value="storage">Storage</option>
+                  <option value="parking">Parking</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="listing-location-select">Location Area</label>
+                <select id="listing-location-select" class="form-control" required>
+                  <option value="Jaffna">Jaffna</option>
+                  <option value="Nallur">Nallur</option>
+                  <option value="Chunnakam">Chunnakam</option>
+                  <option value="Kilinochchi">Kilinochchi</option>
+                  <option value="Vavuniya">Vavuniya</option>
+                  <option value="Mullaitivu">Mullaitivu</option>
+                  <option value="Point Pedro">Point Pedro</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="listing-price-input">Rent Rate (LKR)</label>
+                <input type="number" id="listing-price-input" class="form-control" placeholder="e.g. 4500" min="10" required>
+              </div>
+              <div class="form-group">
+                <label for="listing-unit-select">Charging Unit</label>
+                <select id="listing-unit-select" class="form-control" required>
+                  <option value="hour">Per Hour</option>
+                  <option value="day">Per Day</option>
+                  <option value="month">Per Month</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="listing-desc-input">Detailed Description & Specifications</label>
+              <textarea id="listing-desc-input" class="form-control" rows="3" placeholder="Describe the specs, capacity, access, and rules..." required></textarea>
+            </div>
+            
+            <button type="submit" style="display: none;" id="form-submit-trigger"></button>
+          </form>
+        </div>
+
+        <!-- Success Message -->
+        <div id="listing-success-content" style="display: none; text-align: center; padding: 2rem 1rem;">
+          <div style="width: 4rem; height: 4rem; border-radius: var(--radius-full); background-color: rgba(47, 138, 31, 0.1); color: var(--primary-green); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+          <h4 style="font-size: 1.25rem; color: var(--primary-dark); margin-bottom: 0.5rem;">Asset Submitted!</h4>
+          <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1rem;">
+            Your listing details have been submitted. Our field verification agent in Northern Province will contact you shortly to check ownership and approve details.
+          </p>
+          <p style="color: var(--text-light); font-size: 0.8rem;">
+            Listing status: <strong>Pending NIC Verification</strong>.
+          </p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline modal-close">Cancel</button>
+        <button class="btn btn-primary" onclick="document.getElementById('form-submit-trigger').click()">Publish Listing</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="details.js"></script>
+</body>
+</html>

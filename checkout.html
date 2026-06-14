@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirm Your Booking | Util Lanka</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Checkout Page Styles */
+    .checkout-page-wrapper {
+      padding: 7rem 0 3rem 0;
+      background-color: var(--bg-light);
+      min-height: 100vh;
+    }
+
+    .checkout-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin-bottom: 2rem;
+    }
+
+    /* Column layout split */
+    .checkout-split-layout {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 2.5rem;
+      align-items: flex-start;
+    }
+
+    /* Checkout Left Panel Form Card */
+    .checkout-form-card {
+      background-color: var(--bg-white);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .checkout-section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .checkout-section-title span.number {
+      background-color: var(--accent-teal-light);
+      color: var(--accent-teal);
+      width: 1.75rem;
+      height: 1.75rem;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 800;
+    }
+
+    /* Payment Tabs Selection */
+    .payment-options-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .payment-card {
+      border: 1.5px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: var(--bg-white);
+    }
+
+    .payment-card:hover {
+      border-color: var(--primary-dark);
+      background-color: var(--bg-light);
+    }
+
+    .payment-card.active {
+      border-color: var(--accent-teal);
+      background-color: var(--accent-teal-light);
+      box-shadow: 0 0 0 1px var(--accent-teal);
+    }
+
+    .payment-card-icon {
+      color: var(--primary-dark);
+    }
+
+    .payment-card.active .payment-card-icon {
+      color: var(--accent-teal);
+    }
+
+    .payment-card-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .payment-info-container {
+      background-color: var(--bg-light);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .payment-info-block {
+      line-height: 1.6;
+    }
+
+    /* Right column sticky summary card */
+    .checkout-summary-card {
+      background-color: var(--bg-white);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-md);
+      position: sticky;
+      top: 100px;
+    }
+
+    .summary-asset-row {
+      display: flex;
+      gap: 1rem;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .summary-asset-img {
+      width: 80px;
+      height: 80px;
+      border-radius: var(--radius-md);
+      object-fit: cover;
+      border: 1px solid var(--border-light);
+    }
+
+    .summary-asset-details h4 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin-bottom: 0.25rem;
+    }
+
+    .summary-asset-address {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .summary-asset-rating {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .summary-details-section {
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 1.25rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .summary-details-row {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .checkout-totals-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .checkout-totals-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .checkout-totals-row.grand-total {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      border-top: 1px solid var(--border-light);
+      padding-top: 0.75rem;
+      margin-top: 0.25rem;
+    }
+
+    /* Success confirmation section overlay */
+    .success-container {
+      max-width: 650px;
+      margin: 0 auto;
+      background-color: var(--bg-white);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 3rem 2.5rem;
+      box-shadow: var(--shadow-lg);
+      text-align: center;
+    }
+
+    .success-icon-box {
+      width: 5rem;
+      height: 5rem;
+      border-radius: var(--radius-full);
+      background-color: rgba(47, 138, 31, 0.1);
+      color: var(--primary-green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem auto;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .success-heading {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin-bottom: 0.5rem;
+    }
+
+    .success-subtext {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .success-reference-badge {
+      background-color: var(--bg-light);
+      border: 1px solid var(--border-light);
+      padding: 0.9rem 1.5rem;
+      border-radius: var(--radius-md);
+      font-family: monospace;
+      font-size: 1.15rem;
+      color: var(--primary-dark);
+      margin-bottom: 2.5rem;
+      display: inline-block;
+    }
+
+    .success-card-block {
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      text-align: left;
+      margin-bottom: 2rem;
+      background-color: var(--bg-light);
+    }
+
+    .success-card-block h4 {
+      font-size: 1.05rem;
+      color: var(--primary-dark);
+      margin-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 0.5rem;
+    }
+
+    .host-contact-row {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 1rem;
+      align-items: center;
+      margin-top: 0.75rem;
+    }
+
+    .host-contact-avatar {
+      width: 3rem;
+      height: 3rem;
+      border-radius: var(--radius-full);
+      background-color: var(--primary-dark);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    /* Response Modals */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(6, 47, 99, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition-normal);
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background-color: var(--bg-white);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 500px;
+      box-shadow: var(--shadow-xl);
+      overflow: hidden;
+      transform: translateY(20px);
+      transition: transform var(--transition-normal);
+    }
+
+    .modal-overlay.active .modal-card {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      padding: 1.25rem 1.5rem;
+      background-color: var(--bg-light);
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      font-size: 1.15rem;
+      color: var(--primary-dark);
+    }
+
+    .modal-close {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-light);
+      cursor: pointer;
+      line-height: 1;
+      transition: var(--transition-fast);
+    }
+
+    .modal-close:hover {
+      color: var(--primary-dark);
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      background-color: var(--bg-light);
+      border-top: 1px solid var(--border-light);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .checkout-split-layout {
+        grid-template-columns: 1fr;
+      }
+      .checkout-summary-card {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER / NAVBAR -->
+  <header class="header scrolled">
+    <div class="container">
+      <nav class="navbar" aria-label="Main Navigation">
+        <a href="index.html" class="logo-container">
+          <img src="assets/logo.png" class="logo-img" alt="Util Lanka Logo">
+          <span class="logo-text">Util Lanka</span>
+        </a>
+        
+        <ul class="nav-menu">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="marketplace.html" class="nav-link">Browse Assets</a></li>
+          <li><a href="index.html#how-it-works-section" class="nav-link">How it Works</a></li>
+          <li><a href="index.html#trust-section" class="nav-link">Trust & Safety</a></li>
+          <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+        </ul>
+        
+        <div class="nav-actions">
+          <button class="btn btn-outline list-asset-trigger">List an Asset</button>
+          <button class="btn btn-primary list-asset-trigger" style="background-color: var(--primary-dark);">Sign In</button>
+        </div>
+
+        <button class="menu-toggle" id="menu-toggle-btn" aria-label="Open Navigation Menu">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MOBILE MENU DRAWER -->
+  <div class="mobile-menu-drawer" id="mobile-menu">
+    <nav class="mobile-nav-links" aria-label="Mobile Navigation">
+      <a href="index.html" class="mobile-nav-link">Home</a>
+      <a href="marketplace.html" class="mobile-nav-link">Browse Assets</a>
+      <a href="index.html#how-it-works-section" class="mobile-nav-link">How it Works</a>
+      <a href="index.html#trust-section" class="mobile-nav-link">Trust & Safety</a>
+      <a href="dashboard.html" class="mobile-nav-link">Dashboard</a>
+    </nav>
+    <div class="mobile-nav-actions">
+      <button class="btn btn-outline mobile-btn list-asset-trigger">List an Asset</button>
+      <button class="btn btn-primary mobile-btn list-asset-trigger" style="background-color: var(--primary-dark);">Sign In</button>
+    </div>
+  </div>
+
+  <!-- CHECKOUT PAGE BODY CONTENT -->
+  <main class="checkout-page-wrapper">
+    <div class="container">
+      
+      <!-- Checkout Interactive Section -->
+      <div id="main-checkout-section">
+        <h1 class="checkout-title">Confirm and Request Booking</h1>
+
+        <div class="checkout-split-layout">
+          
+          <!-- Left Forms Panel -->
+          <div class="checkout-form-panel">
+            <form id="checkout-booking-form" class="checkout-form-card">
+              
+              <!-- Step 1: Review Dates -->
+              <div>
+                <h3 class="checkout-section-title">
+                  <span class="number">1</span>
+                  Review Booking Schedule
+                </h3>
+                <div class="booking-date-grid">
+                  <div class="form-group">
+                    <label for="checkout-start-date">Check-In Date</label>
+                    <input type="date" id="checkout-start-date" class="form-control" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="checkout-end-date">Check-Out Date</label>
+                    <input type="date" id="checkout-end-date" class="form-control" required>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 2: Contact Information -->
+              <div>
+                <h3 class="checkout-section-title">
+                  <span class="number">2</span>
+                  Your Information
+                </h3>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                  <label for="user-name">Full Name</label>
+                  <input type="text" id="user-name" class="form-control" placeholder="e.g. Shalini Alwis" required>
+                </div>
+                <div class="form-group">
+                  <label for="user-phone">Mobile / WhatsApp Number</label>
+                  <input type="tel" id="user-phone" class="form-control" placeholder="e.g. 077 123 4567" required>
+                </div>
+              </div>
+
+              <!-- Step 3: Payment Method -->
+              <div>
+                <h3 class="checkout-section-title">
+                  <span class="number">3</span>
+                  Payment Method
+                </h3>
+                
+                <div class="payment-options-grid">
+                  <div class="payment-card active" data-method="cash">
+                    <div class="payment-card-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
+                    </div>
+                    <span class="payment-card-title">Cash Payment</span>
+                  </div>
+
+                  <div class="payment-card" data-method="bank">
+                    <div class="payment-card-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="21" x2="9" y2="9"></line><line x1="15" y1="21" x2="15" y2="9"></line><line x1="3" y1="9" x2="21" y2="9"></line></svg>
+                    </div>
+                    <span class="payment-card-title">Bank Transfer</span>
+                  </div>
+
+                  <div class="payment-card" data-method="mobile">
+                    <div class="payment-card-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                    </div>
+                    <span class="payment-card-title">Mobile Payment</span>
+                  </div>
+                </div>
+
+                <div class="payment-info-container">
+                  <!-- Cash Payment info (Default) -->
+                  <div class="payment-info-block" id="info-cash">
+                    <p><strong>Cash on Hand:</strong> Pay the host directly in cash when you arrive to pick up or access the asset. No advance transaction slip required.</p>
+                  </div>
+                  
+                  <!-- Bank Transfer info -->
+                  <div class="payment-info-block" id="info-bank" style="display: none;">
+                    <p style="margin-bottom: 0.5rem;"><strong>Bank Details:</strong> Transfer the deposit to Ceylon Bank. You can share the transfer slip with the host on pickup verification.</p>
+                    <p style="font-family: monospace; font-size: 0.85rem; padding: 0.4rem; background-color: var(--bg-white); border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+                      Bank: Ceylon Bank (Jaffna)<br>
+                      Name: Util Lanka Pilot Escrow<br>
+                      Acc: 9028109-02
+                    </p>
+                  </div>
+                  
+                  <!-- Mobile Payment info -->
+                  <div class="payment-info-block" id="info-mobile" style="display: none;">
+                    <p><strong>Mobile Money Transfer:</strong> Pay via eZ Cash or mCash to our central gateway mobile number: <strong>+94 77 987 6543</strong>. Please enter the transaction reference ID in your WhatsApp chat with the owner.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Button Confirmation Submit -->
+              <button type="submit" id="btn-confirm-booking" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.05rem; font-weight: 700; border-radius: var(--radius-md);">
+                Confirm & Request Booking
+              </button>
+
+            </form>
+          </div>
+
+          <!-- Right Summary Sidebar Card -->
+          <div class="checkout-summary-panel">
+            <div class="checkout-summary-card">
+              
+              <div class="summary-asset-row">
+                <img id="summary-img" src="" alt="Asset Image" class="summary-asset-img">
+                <div class="summary-asset-details">
+                  <h4 id="summary-title">Asset Title</h4>
+                  <div class="summary-asset-address">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    <span id="summary-address">No. 12, Hospital Road, Jaffna</span>
+                  </div>
+                  <div class="summary-asset-rating">
+                    <span style="color:#F59E0B">★</span> <span id="summary-rating">4.9</span> <span style="font-weight: 400; color: var(--text-light);" id="summary-reviews">(24)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="summary-details-section">
+                <div class="summary-details-row">
+                  <span>Selected Dates:</span>
+                  <strong id="summary-dates-label">Loading...</strong>
+                </div>
+                <div class="summary-details-row">
+                  <span>Total Duration:</span>
+                  <strong id="summary-duration-label">Loading...</strong>
+                </div>
+              </div>
+
+              <div class="checkout-totals-section">
+                <div class="checkout-totals-row">
+                  <span id="price-item-label">Rent calculation</span>
+                  <span id="price-item-total">LKR 0</span>
+                </div>
+                <div class="checkout-totals-row">
+                  <span>Platform Fee (5%)</span>
+                  <span id="platform-fee-total">LKR 0</span>
+                </div>
+                <div class="checkout-totals-row">
+                  <span>Refundable Security Deposit (50%)</span>
+                  <span id="deposit-total">LKR 0</span>
+                </div>
+                <div class="checkout-totals-row grand-total">
+                  <span>Estimated Grand Total</span>
+                  <span id="grand-total-amount">LKR 0</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Success Confirmation Section (Hidden by Default) -->
+      <div id="success-confirmation-section" style="display: none;">
+        <div class="success-container">
+          
+          <div class="success-icon-box">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+
+          <h2 class="success-heading">Booking Confirmed Successfully!</h2>
+          <p class="success-subtext">
+            Your booking request has been submitted to our Northern Province sharing queue. We have secured the host calendar and notified them of your request.
+          </p>
+
+          <div class="success-reference-badge" id="success-ref-code">
+            <strong>Reference ID:</strong> UTL-892102
+          </div>
+
+          <!-- Owner Contact details block -->
+          <div class="success-card-block">
+            <h4>Host Owner Contact Details</h4>
+            <div class="host-contact-row">
+              <div class="host-contact-avatar">H</div>
+              <div>
+                <p><strong id="success-owner-name">Shalini Alwis</strong></p>
+                <p id="success-owner-phone" style="font-size: 0.9rem; color: var(--text-muted);">Phone: +94 77 987 6543</p>
+                <p id="success-owner-email" style="font-size: 0.9rem; color: var(--text-muted);">Email: shalini.a@utillanka.lk</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Booking Summary details block -->
+          <div class="success-card-block">
+            <h4>Booking Request Summary</h4>
+            <div style="font-size: 0.9rem; line-height: 1.7; color: var(--text-muted);">
+              <p><strong>Asset:</strong> <span id="success-summary-title">Commercial Kitchen Space</span></p>
+              <p><strong>Location:</strong> <span id="success-summary-address">No. 12, Hospital Road, Jaffna</span></p>
+              <p><strong>Schedule:</strong> <span id="success-summary-dates">June 13, 2026 - June 17, 2026</span></p>
+              <p><strong>Duration:</strong> <span id="success-summary-duration">4 day(s)</span></p>
+            </div>
+          </div>
+
+          <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 2rem; line-height: 1.6;">
+            A coordinate verification agent will text you on WhatsApp within 4 hours to verify pickup logistics and complete verification checks.
+          </p>
+
+          <a href="marketplace.html" class="btn btn-primary" style="padding: 0.9rem 2.5rem; font-size: 1rem; border-radius: var(--radius-md); font-weight: 700; background-color: var(--primary-dark);">
+            Return to Marketplace
+          </a>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col brand">
+          <div class="logo-container" style="margin-bottom: 1.25rem;">
+            <img src="assets/logo.png" class="logo-img" alt="Util Lanka Logo">
+            <span class="logo-text" style="color: var(--bg-white);">Util Lanka</span>
+          </div>
+          <p class="footer-tagline">Unlocking value from underutilized assets across communities in Sri Lanka. Starting with our active pilot launch in Northern Province.</p>
+        </div>
+        
+        <div class="footer-col links">
+          <h4>Platform</h4>
+          <ul>
+            <li><a href="marketplace.html">Browse Assets</a></li>
+            <li><a href="index.html#how-it-works-section">How It Works</a></li>
+            <li><a href="index.html#trust-section">Trust & Safety</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-col links">
+          <h4>Active Locations</h4>
+          <ul>
+            <li><a href="#">Jaffna, Northern Province</a></li>
+            <li><a href="#">Kilinochchi, Northern Province</a></li>
+            <li><a href="#">Vavuniya, Northern Province</a></li>
+            <li><a href="#">Mullaitivu, Northern Province</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-col contact">
+          <h4>Pilot Contact</h4>
+          <p style="margin-bottom: 0.75rem;">Interested in listing tools or commercial spaces in Northern Province? Get in touch with our team today.</p>
+          <p><strong>Email:</strong> support@utillanka.lk</p>
+          <p><strong>Office:</strong> Hospital Road, Jaffna, Sri Lanka</p>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2026 Util Lanka. All Rights Reserved. Designed for local trust and community asset sharing.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- LIST ASSET MODAL -->
+  <div class="modal-overlay" id="list-asset-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>List Your Asset</h3>
+        <span class="modal-close" aria-label="Close modal">&times;</span>
+      </div>
+
+      <div class="modal-body">
+        <div id="listing-form-content">
+          <p style="color: var(--text-light); font-size: 0.85rem; margin-bottom: 1.5rem;">Fill in the details below. We verify every listing within 4 hours before publishing.</p>
+
+          <form id="modal-listing-form">
+            <div class="form-group">
+              <label for="listing-title-input">Asset Title / Name</label>
+              <input type="text" id="listing-title-input" class="form-control" placeholder="e.g. Commercial Cloud Kitchen Space near Hospital Road" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="listing-category-select">Asset Category</label>
+                <select id="listing-category-select" class="form-control" required>
+                  <option value="kitchens">Kitchens</option>
+                  <option value="vehicles">Vehicles</option>
+                  <option value="equipment">Equipment</option>
+                  <option value="storage">Storage</option>
+                  <option value="parking">Parking</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="listing-location-select">Location Area</label>
+                <select id="listing-location-select" class="form-control" required>
+                  <option value="Jaffna">Jaffna</option>
+                  <option value="Nallur">Nallur</option>
+                  <option value="Chunnakam">Chunnakam</option>
+                  <option value="Kilinochchi">Kilinochchi</option>
+                  <option value="Vavuniya">Vavuniya</option>
+                  <option value="Mullaitivu">Mullaitivu</option>
+                  <option value="Point Pedro">Point Pedro</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="listing-price-input">Rent Rate (LKR)</label>
+                <input type="number" id="listing-price-input" class="form-control" placeholder="e.g. 4500" min="10" required>
+              </div>
+              <div class="form-group">
+                <label for="listing-unit-select">Charging Unit</label>
+                <select id="listing-unit-select" class="form-control" required>
+                  <option value="hour">Per Hour</option>
+                  <option value="day">Per Day</option>
+                  <option value="month">Per Month</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="listing-desc-input">Detailed Description & Specifications</label>
+              <textarea id="listing-desc-input" class="form-control" rows="3" placeholder="Describe the specs, capacity, access, and rules..." required></textarea>
+            </div>
+            
+            <button type="submit" style="display: none;" id="form-submit-trigger"></button>
+          </form>
+        </div>
+
+        <div id="listing-success-content" style="display: none; text-align: center; padding: 2rem 1rem;">
+          <div style="width: 4rem; height: 4rem; border-radius: var(--radius-full); background-color: rgba(47, 138, 31, 0.1); color: var(--primary-green); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+          <h4 style="font-size: 1.25rem; color: var(--primary-dark); margin-bottom: 0.5rem;">Asset Submitted!</h4>
+          <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1rem;">
+            Your listing details have been submitted. Our field verification agent in Northern Province will contact you shortly to check ownership and approve details.
+          </p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline modal-close">Cancel</button>
+        <button class="btn btn-primary" onclick="document.getElementById('form-submit-trigger').click()">Publish Listing</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="checkout.js"></script>
+</body>
+</html>

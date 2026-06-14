@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Host Dashboard | Util Lanka</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Owner Dashboard Styles */
+    .dashboard-wrapper {
+      padding: 7rem 0 3rem 0;
+      background-color: var(--bg-light);
+      min-height: 100vh;
+    }
+
+    .dashboard-header {
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .dashboard-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin-bottom: 0.25rem;
+    }
+
+    .dashboard-welcome {
+      color: var(--text-light);
+      font-size: 0.95rem;
+    }
+
+    /* Overview Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+      background-color: var(--bg-white);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 4px;
+      background-color: var(--primary-dark);
+    }
+
+    .stat-card.earnings::after { background-color: var(--primary-green); }
+    .stat-card.requests::after { background-color: var(--accent-teal); }
+    .stat-card.bookings::after { background-color: #D97706; }
+
+    .stat-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-light);
+      letter-spacing: 0.05em;
+    }
+
+    .stat-number {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      font-family: var(--font-heading);
+    }
+
+    /* Column Layout Split */
+    .dashboard-split-layout {
+      display: grid;
+      grid-template-columns: 1.8fr 1fr;
+      gap: 2.5rem;
+      align-items: flex-start;
+    }
+
+    .dashboard-panel-card {
+      background-color: var(--bg-white);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 2rem;
+    }
+
+    .panel-card-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin-bottom: 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1.5px solid var(--border-light);
+      padding-bottom: 0.75rem;
+    }
+
+    /* Renter Booking Requests */
+    .requests-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .request-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem;
+      border: 1.5px solid var(--border-light);
+      border-radius: var(--radius-md);
+      gap: 1rem;
+      background-color: var(--bg-white);
+      transition: var(--transition-fast);
+    }
+
+    .request-item:hover {
+      box-shadow: var(--shadow-sm);
+      border-color: var(--accent-teal);
+    }
+
+    .request-item-details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .request-renter-avatar {
+      width: 1.75rem;
+      height: 1.75rem;
+      border-radius: var(--radius-full);
+      background-color: var(--accent-teal);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+
+    .request-renter-name {
+      font-size: 0.9rem;
+      color: var(--text-main);
+    }
+
+    .request-asset-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .request-dates-range {
+      font-size: 0.8rem;
+      color: var(--text-light);
+    }
+
+    .request-total-price {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .request-item-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      min-width: 120px;
+    }
+
+    /* Dashboard Listings Card Grid */
+    .dashboard-listings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .dashboard-listing-card {
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition-fast);
+      background-color: var(--bg-white);
+    }
+
+    .dashboard-listing-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .card-img-wrapper {
+      position: relative;
+      height: 130px;
+    }
+
+    .listing-thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .status-badge {
+      position: absolute;
+      top: 0.5rem;
+      left: 0.5rem;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.2rem 0.5rem;
+      border-radius: var(--radius-sm);
+      color: white;
+      box-shadow: var(--shadow-sm);
+      z-index: 2;
+    }
+
+    .status-badge.badge-active { background-color: var(--primary-green); }
+    .status-badge.badge-paused { background-color: #EF4444; }
+
+    .card-details {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex-grow: 1;
+    }
+
+    .listing-card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .listing-card-address {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      margin-top: -0.25rem;
+    }
+
+    .listing-card-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px dashed var(--border-light);
+      padding-top: 0.5rem;
+      margin-top: 0.25rem;
+    }
+
+    .listing-card-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .listing-card-actions button {
+      flex: 1;
+      padding: 0.4rem 0.75rem;
+      font-size: 0.8rem;
+    }
+
+    /* Payouts Table */
+    .earnings-table-wrapper {
+      overflow-x: auto;
+    }
+
+    .earnings-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.85rem;
+    }
+
+    .earnings-table th,
+    .earnings-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .earnings-table th {
+      background-color: var(--bg-light);
+      color: var(--primary-dark);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+    }
+
+    .status-tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.2rem 0.5rem;
+      border-radius: var(--radius-sm);
+      display: inline-block;
+    }
+
+    .status-tag.badge-paid { background-color: rgba(47, 138, 31, 0.1); color: var(--primary-green); }
+    .status-tag.badge-confirmed { background-color: var(--accent-teal-light); color: var(--accent-teal); }
+
+    /* Peak Holiday Manager */
+    .peak-manager-box {
+      text-align: center;
+      padding: 0.5rem 0;
+    }
+
+    /* Notifications Panel */
+    .notifications-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .notification-item {
+      padding: 0.75rem 1rem;
+      border-left: 3px solid var(--accent-teal);
+      background-color: var(--bg-light);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      font-size: 0.85rem;
+    }
+
+    .notification-time {
+      font-size: 0.7rem;
+      color: var(--text-light);
+      display: block;
+      margin-bottom: 0.15rem;
+      font-weight: 600;
+    }
+
+    .notification-text {
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .dashboard-split-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .request-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .request-item-actions {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER / NAVBAR -->
+  <header class="header scrolled">
+    <div class="container">
+      <nav class="navbar" aria-label="Main Navigation">
+        <a href="index.html" class="logo-container">
+          <img src="assets/logo.png" class="logo-img" alt="Util Lanka Logo">
+          <span class="logo-text">Util Lanka</span>
+        </a>
+        
+        <ul class="nav-menu">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="marketplace.html" class="nav-link">Browse Assets</a></li>
+          <li><a href="index.html#how-it-works-section" class="nav-link">How it Works</a></li>
+          <li><a href="index.html#trust-section" class="nav-link">Trust & Safety</a></li>
+          <li><a href="#" class="nav-link active">Dashboard</a></li>
+        </ul>
+        
+        <div class="nav-actions">
+          <button class="btn btn-outline list-asset-trigger">List an Asset</button>
+          <button class="btn btn-primary list-asset-trigger" style="background-color: var(--primary-dark);">Sign In</button>
+        </div>
+
+        <button class="menu-toggle" id="menu-toggle-btn" aria-label="Open Navigation Menu">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MOBILE MENU DRAWER -->
+  <div class="mobile-menu-drawer" id="mobile-menu">
+    <nav class="mobile-nav-links" aria-label="Mobile Navigation">
+      <a href="index.html" class="mobile-nav-link">Home</a>
+      <a href="marketplace.html" class="mobile-nav-link">Browse Assets</a>
+      <a href="index.html#how-it-works-section" class="mobile-nav-link">How it Works</a>
+      <a href="index.html#trust-section" class="mobile-nav-link">Trust & Safety</a>
+      <a href="#" class="mobile-nav-link">Dashboard</a>
+    </nav>
+    <div class="mobile-nav-actions">
+      <button class="btn btn-outline mobile-btn list-asset-trigger">List an Asset</button>
+      <button class="btn btn-primary mobile-btn list-asset-trigger" style="background-color: var(--primary-dark);">Sign In</button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD MAIN PANEL -->
+  <main class="dashboard-wrapper">
+    <div class="container">
+      
+      <!-- Welcome Header -->
+      <section class="dashboard-header">
+        <div>
+          <h1 class="dashboard-title">Owner Dashboard</h1>
+          <p class="dashboard-welcome">Welcome back, <strong>Shalini Alwis</strong>. Monitor listings and earnings across Northern Province.</p>
+        </div>
+        <div>
+          <button class="btn btn-primary list-asset-trigger" style="padding: 0.75rem 1.5rem; font-weight: 700; border-radius: var(--radius-md);">+ Add New Asset</button>
+        </div>
+      </section>
+
+      <!-- Stats Overview Cards Grid -->
+      <section class="stats-grid">
+        
+        <div class="stat-card">
+          <span class="stat-label">Total Listings</span>
+          <span class="stat-number" id="stat-total-listings">0</span>
+        </div>
+
+        <div class="stat-card bookings">
+          <span class="stat-label">Active Bookings</span>
+          <span class="stat-number" id="stat-active-bookings">0</span>
+        </div>
+
+        <div class="stat-card earnings">
+          <span class="stat-label">Monthly Earnings</span>
+          <span class="stat-number" id="stat-monthly-earnings">LKR 0</span>
+        </div>
+
+        <div class="stat-card requests">
+          <span class="stat-label">Pending Requests</span>
+          <span class="stat-number" id="stat-pending-requests">0</span>
+        </div>
+
+      </section>
+
+      <!-- Main split panel container -->
+      <div class="dashboard-split-layout">
+        
+        <!-- Left details panel column -->
+        <div class="dashboard-left-panel">
+          
+          <!-- Section 1: Booking Requests -->
+          <div class="dashboard-panel-card">
+            <h3 class="panel-card-title">Pending Booking Requests</h3>
+            <div class="requests-list" id="requests-list-container">
+              <!-- Dynamically populated renter requests -->
+            </div>
+          </div>
+
+          <!-- Section 2: My Listings -->
+          <div class="dashboard-panel-card">
+            <h3 class="panel-card-title">My Managed Assets</h3>
+            <div class="dashboard-listings-grid" id="listings-grid-container">
+              <!-- Dynamically populated host listing cards -->
+            </div>
+          </div>
+
+          <!-- Section 3: Earnings Payout Logs -->
+          <div class="dashboard-panel-card">
+            <h3 class="panel-card-title">Completed Bookings & Payout Logs</h3>
+            <div class="earnings-table-wrapper">
+              <table class="earnings-table">
+                <thead>
+                  <tr>
+                    <th>Shared Asset</th>
+                    <th>Renter Name</th>
+                    <th>Rental Dates</th>
+                    <th>Amount Paid</th>
+                    <th>Payout Status</th>
+                  </tr>
+                </thead>
+                <tbody id="earnings-tbody">
+                  <!-- Dynamically populated table logs -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right alerts / notifications panel column -->
+        <aside class="dashboard-right-panel">
+          
+          <!-- Availability Manager Panel -->
+          <div class="dashboard-panel-card">
+            <h3 class="panel-card-title">Availability Manager</h3>
+            <div class="peak-manager-box">
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.5;">
+                Going away or fully reserved offline? Turn on Peak Season Emergency Pause to temporarily hide all your listings from search grids in Jaffna.
+              </p>
+              <button id="btn-toggle-peak-season" class="btn btn-outline" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-md); font-weight: 700; color: var(--accent-teal); border-color: var(--accent-teal); background-color: var(--accent-teal-light); transition: var(--transition-fast);">
+                Activate Nallur Festival Pause
+              </button>
+            </div>
+          </div>
+
+          <!-- Notification Feed Panel -->
+          <div class="dashboard-panel-card">
+            <h3 class="panel-card-title">Recent Activity Feed</h3>
+            <div class="notifications-list" id="notifications-container">
+              <!-- Dynamically populated activity feeds -->
+            </div>
+          </div>
+
+        </aside>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col brand">
+          <div class="logo-container" style="margin-bottom: 1.25rem;">
+            <img src="assets/logo.png" class="logo-img" alt="Util Lanka Logo">
+            <span class="logo-text" style="color: var(--bg-white);">Util Lanka</span>
+          </div>
+          <p class="footer-tagline">Unlocking value from underutilized assets across communities in Sri Lanka. Starting with our active pilot launch in Northern Province.</p>
+        </div>
+        
+        <div class="footer-col links">
+          <h4>Platform</h4>
+          <ul>
+            <li><a href="marketplace.html">Browse Assets</a></li>
+            <li><a href="index.html#how-it-works-section">How It Works</a></li>
+            <li><a href="index.html#trust-section">Trust & Safety</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-col links">
+          <h4>Active Locations</h4>
+          <ul>
+            <li><a href="#">Jaffna, Northern Province</a></li>
+            <li><a href="#">Kilinochchi, Northern Province</a></li>
+            <li><a href="#">Vavuniya, Northern Province</a></li>
+            <li><a href="#">Mullaitivu, Northern Province</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-col contact">
+          <h4>Pilot Contact</h4>
+          <p style="margin-bottom: 0.75rem;">Interested in listing tools or commercial spaces in Northern Province? Get in touch with our team today.</p>
+          <p><strong>Email:</strong> support@utillanka.lk</p>
+          <p><strong>Office:</strong> Hospital Road, Jaffna, Sri Lanka</p>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2026 Util Lanka. All Rights Reserved. Designed for local trust and community asset sharing.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- LIST ASSET MODAL -->
+  <div class="modal-overlay" id="list-asset-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>List Your Asset</h3>
+        <span class="modal-close" aria-label="Close modal">&times;</span>
+      </div>
+
+      <div class="modal-body">
+        <div id="listing-form-content">
+          <p style="color: var(--text-light); font-size: 0.85rem; margin-bottom: 1.5rem;">Fill in the details below. We verify every listing within 4 hours before publishing.</p>
+
+          <form id="modal-listing-form">
+            <div class="form-group">
+              <label for="listing-title-input">Asset Title / Name</label>
+              <input type="text" id="listing-title-input" class="form-control" placeholder="e.g. Commercial Cloud Kitchen Space near Hospital Road" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="listing-category-select">Asset Category</label>
+                <select id="listing-category-select" class="form-control" required>
+                  <option value="kitchens">Kitchens</option>
+                  <option value="vehicles">Vehicles</option>
+                  <option value="equipment">Equipment</option>
+                  <option value="storage">Storage</option>
+                  <option value="parking">Parking</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="listing-location-select">Location Area</label>
+                <select id="listing-location-select" class="form-control" required>
+                  <option value="Jaffna">Jaffna</option>
+                  <option value="Nallur">Nallur</option>
+                  <option value="Chunnakam">Chunnakam</option>
+                  <option value="Kilinochchi">Kilinochchi</option>
+                  <option value="Vavuniya">Vavuniya</option>
+                  <option value="Mullaitivu">Mullaitivu</option>
+                  <option value="Point Pedro">Point Pedro</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="listing-price-input">Rent Rate (LKR)</label>
+                <input type="number" id="listing-price-input" class="form-control" placeholder="e.g. 4500" min="10" required>
+              </div>
+              <div class="form-group">
+                <label for="listing-unit-select">Charging Unit</label>
+                <select id="listing-unit-select" class="form-control" required>
+                  <option value="hour">Per Hour</option>
+                  <option value="day">Per Day</option>
+                  <option value="month">Per Month</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="listing-desc-input">Detailed Description & Specifications</label>
+              <textarea id="listing-desc-input" class="form-control" rows="3" placeholder="Describe the specs, capacity, access, and rules..." required></textarea>
+            </div>
+            
+            <button type="submit" style="display: none;" id="form-submit-trigger"></button>
+          </form>
+        </div>
+
+        <div id="listing-success-content" style="display: none; text-align: center; padding: 2rem 1rem;">
+          <div style="width: 4rem; height: 4rem; border-radius: var(--radius-full); background-color: rgba(47, 138, 31, 0.1); color: var(--primary-green); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+          <h4 style="font-size: 1.25rem; color: var(--primary-dark); margin-bottom: 0.5rem;">Asset Submitted!</h4>
+          <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1rem;">
+            Your listing details have been submitted. Our field verification agent in Northern Province will contact you shortly to check ownership and approve details.
+          </p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline modal-close">Cancel</button>
+        <button class="btn btn-primary" onclick="document.getElementById('form-submit-trigger').click()">Publish Listing</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
