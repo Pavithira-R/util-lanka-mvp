@@ -1052,6 +1052,43 @@
               <label for="listing-desc-input">Detailed Description & Specifications</label>
               <textarea id="listing-desc-input" class="form-control" rows="3" placeholder="Describe the specs, capacity, access, and rules..." required></textarea>
             </div>
+
+            <!-- Upload Asset Images Section -->
+            <div class="form-group upload-section">
+              <label>Upload Asset Images</label>
+              <p class="upload-subtitle">Upload clear and real photos of your asset</p>
+              
+              <div class="upload-dropzone" id="listing-dropzone">
+                <input type="file" id="listing-file-input" multiple accept="image/png, image/jpeg, image/jpg" style="display: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="upload-icon">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <p class="upload-dropzone-text">Drag & drop files here or <span class="upload-link">browse</span></p>
+                <button type="button" class="btn btn-outline-teal upload-btn" id="listing-upload-btn" style="margin-top: 0.25rem; padding: 0.4rem 1rem; font-size: 0.8rem; border-radius: var(--radius-md);">Choose Files</button>
+                <p class="upload-dropzone-subtext" style="margin-top: 0.25rem;">PNG, JPG up to 5MB</p>
+              </div>
+
+              <div class="upload-preview-grid" id="listing-preview-grid">
+                <div class="preview-placeholder active">
+                  <span class="placeholder-text">Required</span>
+                </div>
+                <div class="preview-placeholder"></div>
+                <div class="preview-placeholder"></div>
+              </div>
+
+              <div class="upload-info-box">
+                <div class="upload-guidelines">
+                  <p class="guideline-item text-green">● At least one image is required</p>
+                  <p class="guideline-item">● Listings are reviewed before approval</p>
+                </div>
+                <div class="upload-notices">
+                  <p class="notice-item">🔒 <strong>Trust & Verification Policy:</strong></p>
+                  <p class="notice-item">Only real asset images are allowed. Misleading listings may be removed. Images help build trust with renters.</p>
+                </div>
+              </div>
+            </div>
             
             <button type="submit" style="display: none;" id="form-submit-trigger"></button>
           </form>
@@ -1079,6 +1116,7 @@
     </div>
   </div>
 
+  <script src="upload.js"></script>
   <script src="details.js"></script>
 </body>
 </html>
