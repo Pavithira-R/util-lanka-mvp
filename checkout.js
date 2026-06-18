@@ -229,6 +229,7 @@ function loadCheckoutDetails() {
   const hours = parseInt(urlParams.get("hours")) || 4;
   const name = urlParams.get("name") || "";
   const phone = urlParams.get("phone") || "";
+  const nic = urlParams.get("nic") || "";
 
   currentAsset = listingsDatabase.find(item => item.id === assetId) || listingsDatabase[0];
 
@@ -253,6 +254,7 @@ function loadCheckoutDetails() {
   
   document.getElementById("user-name").value = name;
   document.getElementById("user-phone").value = phone;
+  document.getElementById("user-nic").value = nic;
 
   // Fill in Summary Card
   document.getElementById("summary-img").src = currentAsset.image;
@@ -366,6 +368,22 @@ function initFormSubmit() {
     form.addEventListener("submit", (e) => {
       e.preventDefault();
 
+      const name = document.getElementById("user-name").value.trim();
+      const phone = document.getElementById("user-phone").value.trim();
+      const nicVal = document.getElementById("user-nic").value.trim();
+
+      // Sri Lankan NIC verification formats:
+      // Old Format: 9 digits followed by V or X (case insensitive)
+      // New Format: 12 digits
+      const oldNicRegex = /^[0-9]{9}[vVxX]$/;
+      const newNicRegex = /^[0-9]{12}$/;
+
+      if (!oldNicRegex.test(nicVal) && !newNicRegex.test(nicVal)) {
+        alert("Verification Failed: Please enter a valid Sri Lankan National Identity Card (NIC) number.\n\nAllowed formats:\n- Old: 9 digits followed by 'V' or 'X' (e.g. 951234567V)\n- New: 12 digits (e.g. 199512345678)");
+        document.getElementById("user-nic").focus();
+        return;
+      }
+
       const submitBtn = document.getElementById("btn-confirm-booking");
       const originalText = submitBtn.innerHTML;
       submitBtn.disabled = true;
@@ -393,17 +411,114 @@ function initFormSubmit() {
         // Populate Summary details
         document.getElementById("success-summary-title").textContent = currentAsset.title;
         document.getElementById("success-summary-address").textContent = currentAsset.location;
+        document.getElementById("success-summary-nic").textContent = nicVal;
         
+        let summaryDatesText = "";
         if (rentMode === "daily") {
           document.getElementById("success-summary-duration").textContent = `${currentDuration} ${currentAsset.unit}(s)`;
           const startVal = document.getElementById("checkout-start-date").value;
           const endVal = document.getElementById("checkout-end-date").value;
-          document.getElementById("success-summary-dates").textContent = `${formatDateStr(startVal)} - ${formatDateStr(endVal)}`;
+          summaryDatesText = `${formatDateStr(startVal)} - ${formatDateStr(endVal)}`;
+          document.getElementById("success-summary-dates").textContent = summaryDatesText;
         } else {
           document.getElementById("success-summary-duration").textContent = `${currentDuration} hour(s)`;
           const dateVal = document.getElementById("checkout-rent-date").value;
           const timeVal = document.getElementById("checkout-rent-time").value;
-          document.getElementById("success-summary-dates").textContent = `${formatDateStr(dateVal)} at ${timeVal}`;
+          summaryDatesText = `${formatDateStr(dateVal)} at ${timeVal}`;
+          document.getElementById("success-summary-dates").textContent = summaryDatesText;
+        }
+
+        // Save new booking request to localStorage for Host Dashboard integration
+        try {
+          const baseTotalText = document.getElementById("price-item-total").textContent;
+          const numericPrice = parseInt(baseTotalText.replace(/[^0-9]/g, "")) || 0;
+
+          // Retain mock data format
+          const newRequest = {
+            id: Math.floor(100 + Math.random() * 900),
+            renter: name,
+            renterNic: nicVal,
+            renterPhone: phone,
+            assetId: currentAsset.id,
+            assetTitle: currentAsset.title,
+            dates: summaryDatesText,
+            duration: currentDuration,
+            price: numericPrice,
+            status: "Pending",
+            rentMode: rentMode
+          };
+
+          // Append to existing localStorage list
+          let localRequests = JSON.parse(localStorage.getItem("bookingRequests"));
+          // If dashboard has not loaded yet, we want to start with default mock requests as seed
+          if (!localRequests) {
+            localRequests = [
+              {
+                id: 101,
+                renter: "Selva R.",
+                renterNic: "912345678V",
+                assetId: 4,
+                assetTitle: "35 kVA Soundproof Diesel Generator",
+                dates: "June 16, 2026 at 09:00 AM",
+                duration: 4,
+                price: 1600,
+                status: "Pending",
+                rentMode: "hourly"
+              },
+              {
+                id: 102,
+                renter: "Thilak S.",
+                renterNic: "751928374V",
+                assetId: 1,
+                assetTitle: "Commercial Cloud Kitchen Space",
+                dates: "June 18, 2026 - June 20, 2026",
+                duration: 2,
+                price: 7000,
+                status: "Pending",
+                rentMode: "daily"
+              },
+              {
+                id: 103,
+                renter: "Kumar A.",
+                renterNic: "198829304192",
+                assetId: 6,
+                assetTitle: "Secure Dry Storage Room (15x20 ft)",
+                dates: "July 01, 2026 - August 01, 2026",
+                duration: 1,
+                price: 2500,
+                status: "Pending",
+                rentMode: "daily"
+              }
+            ];
+          }
+          localRequests.unshift(newRequest);
+          localStorage.setItem("bookingRequests", JSON.stringify(localRequests));
+
+          // Increment host dashboard pending request statistics
+          let localStats = JSON.parse(localStorage.getItem("dashboardStats")) || {
+            totalListings: 4,
+            activeBookings: 2,
+            monthlyEarnings: 24500,
+            pendingRequests: 3
+          };
+          localStats.pendingRequests += 1;
+          localStorage.setItem("dashboardStats", JSON.stringify(localStats));
+
+          // Log dynamic activity notification
+          let localNotifs = JSON.parse(localStorage.getItem("dashboardNotifications")) || [
+            { time: "Just now", text: "New booking request from Selva R. for Generator" },
+            { time: "1 hour ago", text: "NIC Profile Verification approved by Util Lanka team" },
+            { time: "Yesterday", text: "Payout of LKR 14,000 processed to Bank of Ceylon account" },
+            { time: "2 days ago", text: "New 5-star review received from Mahen T. for Mini Van" }
+          ];
+          localNotifs.unshift({
+            time: "Just now",
+            text: `New booking request from ${name} for ${currentAsset.title}`
+          });
+          localStorage.setItem("dashboardNotifications", JSON.stringify(localNotifs));
+
+        } catch (err) {
+          console.error("Local storage error:", err);
         }
         
         // Display Success Screen Section

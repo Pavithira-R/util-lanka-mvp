@@ -494,20 +494,30 @@
                 </div>
               </div>
 
-              <!-- Step 2: Contact Information -->
+              <!-- Step 2: Contact Information & Identity Verification -->
               <div>
                 <h3 class="checkout-section-title">
                   <span class="number">2</span>
-                  Your Information
+                  Your Information & Identity Verification
                 </h3>
-                <div class="form-group" style="margin-bottom: 1rem;">
-                  <label for="user-name">Full Name</label>
-                  <input type="text" id="user-name" class="form-control" placeholder="e.g. Shalini Alwis" required>
+                <div class="form-row" style="margin-bottom: 1rem;">
+                  <div class="form-group">
+                    <label for="user-name">Full Name</label>
+                    <input type="text" id="user-name" class="form-control" placeholder="e.g. Shalini Alwis" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="user-nic">National Identity Card (NIC) Number</label>
+                    <input type="text" id="user-nic" class="form-control" placeholder="e.g. 951234567V or 199512345678" required>
+                  </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="margin-bottom: 0.75rem;">
                   <label for="user-phone">Mobile / WhatsApp Number</label>
                   <input type="tel" id="user-phone" class="form-control" placeholder="e.g. 077 123 4567" required>
                 </div>
+                <p style="font-size: 0.75rem; color: var(--text-light); display: flex; align-items: center; gap: 0.25rem; margin-top: 0.5rem;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--accent-teal);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                  Your NIC is verified and shared only with verified owners to secure safety deposit agreements.
+                </p>
               </div>
 
               <!-- Step 3: Payment Method -->
@@ -665,6 +675,7 @@
               <p><strong>Location:</strong> <span id="success-summary-address">No. 12, Hospital Road, Jaffna</span></p>
               <p><strong>Schedule:</strong> <span id="success-summary-dates">June 13, 2026 - June 17, 2026</span></p>
               <p><strong>Duration:</strong> <span id="success-summary-duration">4 day(s)</span></p>
+              <p><strong>Renter Verified NIC:</strong> <span id="success-summary-nic">951234567V</span></p>
             </div>
           </div>
 

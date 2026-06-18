@@ -6,8 +6,8 @@
 // (e.g. GET /api/host/listings) to enforce strict object-level access controls (BOLA).
 // ============================================================================
 
-// Mock owner database for Shalini Alwis
-let hostListings = [
+// Default Mock Data Seeding for the Demo
+const DEFAULT_HOST_LISTINGS = [
   {
     id: 1,
     title: "Commercial Cloud Kitchen Space",
@@ -62,10 +62,11 @@ let hostListings = [
   }
 ];
 
-let bookingRequests = [
+const DEFAULT_BOOKING_REQUESTS = [
   {
     id: 101,
     renter: "Selva R.",
+    renterNic: "912345678V",
     assetId: 4,
     assetTitle: "35 kVA Soundproof Diesel Generator",
     dates: "June 16, 2026 at 09:00 AM",
@@ -77,6 +78,7 @@ let bookingRequests = [
   {
     id: 102,
     renter: "Thilak S.",
+    renterNic: "751928374V",
     assetId: 1,
     assetTitle: "Commercial Cloud Kitchen Space",
     dates: "June 18, 2026 - June 20, 2026",
@@ -88,6 +90,7 @@ let bookingRequests = [
   {
     id: 103,
     renter: "Kumar A.",
+    renterNic: "198829304192",
     assetId: 6,
     assetTitle: "Secure Dry Storage Room (15x20 ft)",
     dates: "July 01, 2026 - August 01, 2026",
@@ -98,7 +101,7 @@ let bookingRequests = [
   }
 ];
 
-let completedBookings = [
+const DEFAULT_COMPLETED_BOOKINGS = [
   { id: 201, assetTitle: "Commercial Cloud Kitchen Space", renter: "Nirmala R.", dates: "May 10, 2026 (4 hours)", amount: 2000, status: "Paid" },
   { id: 202, assetTitle: "Suzuki Every Mini Van (Dual A/C)", renter: "Mahen T.", dates: "May 22 - May 23, 2026", amount: 6500, status: "Paid" },
   { id: 203, assetTitle: "Secure Dry Storage Room (15x20 ft)", renter: "Jaseem A.", dates: "April 01 - May 01, 2026", amount: 2500, status: "Paid" },
@@ -113,19 +116,33 @@ let completedBookings = [
   { id: 212, assetTitle: "Commercial Cloud Kitchen Space", renter: "Thilak S.", dates: "Jan 20 - Jan 22, 2026", amount: 7000, status: "Paid" }
 ];
 
-let stats = {
+const DEFAULT_STATS = {
   totalListings: 4,
   activeBookings: 2,
   monthlyEarnings: 24500,
   pendingRequests: 3
 };
 
-let notifications = [
+const DEFAULT_NOTIFICATIONS = [
   { time: "Just now", text: "New booking request from Selva R. for Generator" },
   { time: "1 hour ago", text: "NIC Profile Verification approved by Util Lanka team" },
   { time: "Yesterday", text: "Payout of LKR 14,000 processed to Bank of Ceylon account" },
   { time: "2 days ago", text: "New 5-star review received from Mahen T. for Mini Van" }
 ];
+
+// Load dataset from LocalStorage or seed with defaults
+let hostListings = JSON.parse(localStorage.getItem("hostListings")) || DEFAULT_HOST_LISTINGS;
+let bookingRequests = JSON.parse(localStorage.getItem("bookingRequests")) || DEFAULT_BOOKING_REQUESTS;
+let completedBookings = JSON.parse(localStorage.getItem("completedBookings")) || DEFAULT_COMPLETED_BOOKINGS;
+let stats = JSON.parse(localStorage.getItem("dashboardStats")) || DEFAULT_STATS;
+let notifications = JSON.parse(localStorage.getItem("dashboardNotifications")) || DEFAULT_NOTIFICATIONS;
+
+// Sync localStorage immediately so values persist properly
+if (!localStorage.getItem("hostListings")) localStorage.setItem("hostListings", JSON.stringify(hostListings));
+if (!localStorage.getItem("bookingRequests")) localStorage.setItem("bookingRequests", JSON.stringify(bookingRequests));
+if (!localStorage.getItem("completedBookings")) localStorage.setItem("completedBookings", JSON.stringify(completedBookings));
+if (!localStorage.getItem("dashboardStats")) localStorage.setItem("dashboardStats", JSON.stringify(stats));
+if (!localStorage.getItem("dashboardNotifications")) localStorage.setItem("dashboardNotifications", JSON.stringify(notifications));
 
 document.addEventListener("DOMContentLoaded", () => {
   initMobileMenu();
@@ -219,6 +236,7 @@ window.toggleListingStatus = function(id) {
     item.status = "Active";
     addNotification("Just now", `Activated listing: ${item.title}`);
   }
+  localStorage.setItem("hostListings", JSON.stringify(hostListings));
   renderListings();
   renderNotifications();
 };
@@ -249,10 +267,11 @@ function renderRequests() {
     return `
       <div class="request-item" id="request-item-${req.id}">
         <div class="request-item-details">
-          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem; flex-wrap: wrap;">
             <span class="request-renter-avatar">${req.renter.charAt(0)}</span>
             <strong class="request-renter-name">${req.renter}</strong>
             <span class="badge badge-teal" style="font-size: 0.65rem; padding: 0.1rem 0.4rem;">Pending Approval</span>
+            <span class="badge" style="font-size: 0.65rem; padding: 0.1rem 0.4rem; background-color: rgba(20, 184, 166, 0.08); color: var(--accent-teal); font-weight: 700; border: 1px solid rgba(20, 184, 166, 0.2);">NIC Verified: ${req.renterNic || 'N/A'}</span>
           </div>
           <p class="request-asset-title">${req.assetTitle}</p>
           <p class="request-dates-range">${req.dates} (${req.duration} ${unitName})</p>
@@ -275,7 +294,7 @@ window.approveRequest = function(id) {
   // Update Stats
   stats.monthlyEarnings += req.price;
   stats.activeBookings += 1;
-  stats.pendingRequests -= 1;
+  stats.pendingRequests = Math.max(0, stats.pendingRequests - 1);
 
   // Add notification
   addNotification("Just now", `Approved booking request from ${req.renter} for ${req.assetTitle}`);
@@ -293,6 +312,11 @@ window.approveRequest = function(id) {
   // Remove from requests list
   bookingRequests = bookingRequests.filter(r => r.id !== id);
 
+  // Save changes to localStorage
+  localStorage.setItem("bookingRequests", JSON.stringify(bookingRequests));
+  localStorage.setItem("completedBookings", JSON.stringify(completedBookings));
+  localStorage.setItem("dashboardStats", JSON.stringify(stats));
+
   renderStats();
   renderRequests();
   renderEarnings();
@@ -305,13 +329,17 @@ window.declineRequest = function(id) {
   if (!req) return;
 
   // Update Stats
-  stats.pendingRequests -= 1;
+  stats.pendingRequests = Math.max(0, stats.pendingRequests - 1);
 
   // Add notification
   addNotification("Just now", `Declined booking request from ${req.renter} for ${req.assetTitle}`);
 
   // Remove from requests list
   bookingRequests = bookingRequests.filter(r => r.id !== id);
+
+  // Save changes to localStorage
+  localStorage.setItem("bookingRequests", JSON.stringify(bookingRequests));
+  localStorage.setItem("dashboardStats", JSON.stringify(stats));
 
   renderStats();
   renderRequests();
@@ -356,6 +384,7 @@ function renderNotifications() {
 
 function addNotification(time, text) {
   notifications.unshift({ time: time, text: text });
+  localStorage.setItem("dashboardNotifications", JSON.stringify(notifications));
 }
 
 // 7. PEAK SEASON TOGGLE LOGIC
@@ -459,6 +488,9 @@ function initModals() {
         
         hostListings.unshift(newListing);
         stats.totalListings += 1;
+        
+        localStorage.setItem("hostListings", JSON.stringify(hostListings));
+        localStorage.setItem("dashboardStats", JSON.stringify(stats));
         
         addNotification("Just now", `Published new listing: ${title}`);
         
