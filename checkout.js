@@ -14,6 +14,7 @@ const listingsDatabase = [
     category: "kitchens",
     location: "No. 12, Hospital Road, Jaffna",
     price: 3500,
+    priceHourly: 500,
     unit: "day",
     rating: 4.9,
     reviews: 24,
@@ -31,6 +32,7 @@ const listingsDatabase = [
     category: "vehicles",
     location: "No. 15, Kokuvil East, Jaffna",
     price: 6500,
+    priceHourly: 800,
     unit: "day",
     rating: 4.8,
     reviews: 18,
@@ -48,6 +50,7 @@ const listingsDatabase = [
     category: "vehicles",
     location: "No. 18, KKS Road, Chunnakam",
     price: 2000,
+    priceHourly: 300,
     unit: "day",
     rating: 4.75,
     reviews: 15,
@@ -65,6 +68,7 @@ const listingsDatabase = [
     category: "equipment",
     location: "No. 27, Station Road, Kilinochchi",
     price: 3000,
+    priceHourly: 400,
     unit: "day",
     rating: 4.9,
     reviews: 20,
@@ -82,6 +86,7 @@ const listingsDatabase = [
     category: "equipment",
     location: "No. 45, Temple Road, Nallur",
     price: 4500,
+    priceHourly: 600,
     unit: "day",
     rating: 4.95,
     reviews: 14,
@@ -99,6 +104,7 @@ const listingsDatabase = [
     category: "storage",
     location: "No. 8, Mannar Road, Vavuniya",
     price: 2500,
+    priceHourly: 50,
     unit: "month",
     rating: 4.8,
     reviews: 11,
@@ -116,6 +122,7 @@ const listingsDatabase = [
     category: "parking",
     location: "No. 63, Point Pedro Road, Jaffna",
     price: 500,
+    priceHourly: 50,
     unit: "day",
     rating: 4.7,
     reviews: 8,
@@ -133,6 +140,7 @@ const listingsDatabase = [
     category: "kitchens",
     location: "No. 21, Main Street, Mullaitivu",
     price: 3500,
+    priceHourly: 500,
     unit: "day",
     rating: 4.85,
     reviews: 12,
@@ -150,6 +158,7 @@ const listingsDatabase = [
     category: "vehicles",
     location: "No. 45, Temple Road, Nallur",
     price: 1500,
+    priceHourly: 200,
     unit: "day",
     rating: 4.6,
     reviews: 5,
@@ -165,6 +174,7 @@ const listingsDatabase = [
 
 let currentAsset = null;
 let currentDuration = 1;
+let rentMode = "daily";
 
 document.addEventListener("DOMContentLoaded", () => {
   initMobileMenu();
@@ -205,6 +215,7 @@ function loadCheckoutDetails() {
   const urlParams = new URLSearchParams(window.location.search);
   const assetId = parseInt(urlParams.get("id")) || 1;
   const start = urlParams.get("start") || new Date().toISOString().split("T")[0];
+  rentMode = urlParams.get("rentMode") || "daily";
   
   // End Date defaults to 1 day after start if not provided
   let end = urlParams.get("end");
@@ -214,16 +225,31 @@ function loadCheckoutDetails() {
     end = tomorrow.toISOString().split("T")[0];
   }
   
+  const time = urlParams.get("time") || "09:00";
+  const hours = parseInt(urlParams.get("hours")) || 4;
   const name = urlParams.get("name") || "";
   const phone = urlParams.get("phone") || "";
 
   currentAsset = listingsDatabase.find(item => item.id === assetId) || listingsDatabase[0];
 
-  // Fill in Form Inputs
-  document.getElementById("checkout-start-date").value = start;
-  document.getElementById("checkout-end-date").value = end;
-  document.getElementById("checkout-start-date").min = new Date().toISOString().split("T")[0];
-  document.getElementById("checkout-end-date").min = start;
+  // Fill in Form Inputs based on rentMode
+  if (rentMode === "daily") {
+    document.getElementById("checkout-daily-schedule").style.display = "grid";
+    document.getElementById("checkout-hourly-schedule").style.display = "none";
+    
+    document.getElementById("checkout-start-date").value = start;
+    document.getElementById("checkout-end-date").value = end;
+    document.getElementById("checkout-start-date").min = new Date().toISOString().split("T")[0];
+    document.getElementById("checkout-end-date").min = start;
+  } else {
+    document.getElementById("checkout-daily-schedule").style.display = "none";
+    document.getElementById("checkout-hourly-schedule").style.display = "block";
+    
+    document.getElementById("checkout-rent-date").value = start;
+    document.getElementById("checkout-rent-date").min = new Date().toISOString().split("T")[0];
+    document.getElementById("checkout-rent-time").value = time;
+    document.getElementById("checkout-rent-hours").value = hours;
+  }
   
   document.getElementById("user-name").value = name;
   document.getElementById("user-phone").value = phone;
@@ -246,6 +272,12 @@ function loadCheckoutDetails() {
   });
   
   document.getElementById("checkout-end-date").addEventListener("change", recalculateTotals);
+  
+  // Add change listeners for hourly mode inputs
+  document.getElementById("checkout-rent-date").addEventListener("change", recalculateTotals);
+  document.getElementById("checkout-rent-time").addEventListener("change", recalculateTotals);
+  document.getElementById("checkout-rent-hours").addEventListener("input", recalculateTotals);
+  document.getElementById("checkout-rent-hours").addEventListener("change", recalculateTotals);
 
   recalculateTotals();
 }
@@ -254,29 +286,52 @@ function loadCheckoutDetails() {
 function recalculateTotals() {
   if (!currentAsset) return;
 
-  const startVal = document.getElementById("checkout-start-date").value;
-  const endVal = document.getElementById("checkout-end-date").value;
+  let baseCost = 0;
+  let platformFee = 0;
+  let deposit = 0;
+  let grandTotal = 0;
 
-  const start = new Date(startVal);
-  const end = new Date(endVal);
+  if (rentMode === "daily") {
+    const startVal = document.getElementById("checkout-start-date").value;
+    const endVal = document.getElementById("checkout-end-date").value;
 
-  if (currentAsset.unit === "month") {
-    const months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
-    currentDuration = Math.max(1, months || 1);
+    const start = new Date(startVal);
+    const end = new Date(endVal);
+
+    if (currentAsset.unit === "month") {
+      const months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+      currentDuration = Math.max(1, months || 1);
+    } else {
+      const diffTime = Math.abs(end - start);
+      currentDuration = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+    }
+
+    baseCost = currentAsset.price * currentDuration;
+    platformFee = Math.round(baseCost * 0.05);
+    deposit = Math.round(currentAsset.price * 0.5);
+    grandTotal = baseCost + platformFee + deposit;
+
+    // Update Summary Sidebar Elements
+    document.getElementById("summary-dates-label").textContent = `${formatDateStr(startVal)} - ${formatDateStr(endVal)}`;
+    document.getElementById("summary-duration-label").textContent = `${currentDuration} ${currentAsset.unit}(s)`;
+    document.getElementById("price-item-label").innerHTML = `LKR ${currentAsset.price.toLocaleString()} &times; ${currentDuration} ${currentAsset.unit}(s)`;
   } else {
-    const diffTime = Math.abs(end - start);
-    currentDuration = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+    const dateVal = document.getElementById("checkout-rent-date").value;
+    const timeVal = document.getElementById("checkout-rent-time").value;
+    currentDuration = parseInt(document.getElementById("checkout-rent-hours").value) || 1;
+
+    const hrPrice = currentAsset.priceHourly || Math.round(currentAsset.price / 8);
+    baseCost = hrPrice * currentDuration;
+    platformFee = Math.round(baseCost * 0.05);
+    deposit = Math.round(hrPrice * currentDuration * 0.5);
+    grandTotal = baseCost + platformFee + deposit;
+
+    // Update Summary Sidebar Elements
+    document.getElementById("summary-dates-label").textContent = `${formatDateStr(dateVal)} at ${timeVal}`;
+    document.getElementById("summary-duration-label").textContent = `${currentDuration} hour(s)`;
+    document.getElementById("price-item-label").innerHTML = `LKR ${hrPrice.toLocaleString()} &times; ${currentDuration} hour(s)`;
   }
 
-  const baseCost = currentAsset.price * currentDuration;
-  const platformFee = Math.round(baseCost * 0.05);
-  const deposit = Math.round(currentAsset.price * 0.5);
-  const grandTotal = baseCost + platformFee + deposit;
-
-  // Update Summary Sidebar Elements
-  document.getElementById("summary-dates-label").textContent = `${formatDateStr(startVal)} - ${formatDateStr(endVal)}`;
-  document.getElementById("summary-duration-label").textContent = `${currentDuration} ${currentAsset.unit}(s)`;
-  document.getElementById("price-item-label").innerHTML = `LKR ${currentAsset.price.toLocaleString()} &times; ${currentDuration} ${currentAsset.unit}(s)`;
   document.getElementById("price-item-total").textContent = `LKR ${baseCost.toLocaleString()}`;
   document.getElementById("platform-fee-total").textContent = `LKR ${platformFee.toLocaleString()}`;
   document.getElementById("deposit-total").textContent = `LKR ${deposit.toLocaleString()}`;
@@ -338,11 +393,18 @@ function initFormSubmit() {
         // Populate Summary details
         document.getElementById("success-summary-title").textContent = currentAsset.title;
         document.getElementById("success-summary-address").textContent = currentAsset.location;
-        document.getElementById("success-summary-duration").textContent = `${currentDuration} ${currentAsset.unit}(s)`;
         
-        const startVal = document.getElementById("checkout-start-date").value;
-        const endVal = document.getElementById("checkout-end-date").value;
-        document.getElementById("success-summary-dates").textContent = `${formatDateStr(startVal)} - ${formatDateStr(endVal)}`;
+        if (rentMode === "daily") {
+          document.getElementById("success-summary-duration").textContent = `${currentDuration} ${currentAsset.unit}(s)`;
+          const startVal = document.getElementById("checkout-start-date").value;
+          const endVal = document.getElementById("checkout-end-date").value;
+          document.getElementById("success-summary-dates").textContent = `${formatDateStr(startVal)} - ${formatDateStr(endVal)}`;
+        } else {
+          document.getElementById("success-summary-duration").textContent = `${currentDuration} hour(s)`;
+          const dateVal = document.getElementById("checkout-rent-date").value;
+          const timeVal = document.getElementById("checkout-rent-time").value;
+          document.getElementById("success-summary-dates").textContent = `${formatDateStr(dateVal)} at ${timeVal}`;
+        }
         
         // Display Success Screen Section
         document.getElementById("success-confirmation-section").style.display = "block";

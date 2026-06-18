@@ -14,6 +14,7 @@ const listingsDatabase = [
     category: "kitchens",
     location: "No. 12, Hospital Road, Jaffna",
     price: 3500,
+    priceHourly: 500,
     unit: "day",
     rating: 4.9,
     reviews: 24,
@@ -44,6 +45,7 @@ const listingsDatabase = [
     category: "vehicles",
     location: "No. 15, Kokuvil East, Jaffna",
     price: 6500,
+    priceHourly: 800,
     unit: "day",
     rating: 4.8,
     reviews: 18,
@@ -73,6 +75,7 @@ const listingsDatabase = [
     category: "vehicles",
     location: "No. 18, KKS Road, Chunnakam",
     price: 2000,
+    priceHourly: 300,
     unit: "day",
     rating: 4.75,
     reviews: 15,
@@ -102,6 +105,7 @@ const listingsDatabase = [
     category: "equipment",
     location: "No. 27, Station Road, Kilinochchi",
     price: 3000,
+    priceHourly: 400,
     unit: "day",
     rating: 4.9,
     reviews: 20,
@@ -131,6 +135,7 @@ const listingsDatabase = [
     category: "equipment",
     location: "No. 45, Temple Road, Nallur",
     price: 4500,
+    priceHourly: 600,
     unit: "day",
     rating: 4.95,
     reviews: 14,
@@ -160,6 +165,7 @@ const listingsDatabase = [
     category: "storage",
     location: "No. 8, Mannar Road, Vavuniya",
     price: 2500,
+    priceHourly: 50,
     unit: "month",
     rating: 4.8,
     reviews: 11,
@@ -189,6 +195,7 @@ const listingsDatabase = [
     category: "parking",
     location: "No. 63, Point Pedro Road, Jaffna",
     price: 500,
+    priceHourly: 50,
     unit: "day",
     rating: 4.7,
     reviews: 8,
@@ -218,6 +225,7 @@ const listingsDatabase = [
     category: "kitchens",
     location: "No. 21, Main Street, Mullaitivu",
     price: 3500,
+    priceHourly: 500,
     unit: "day",
     rating: 4.85,
     reviews: 12,
@@ -247,6 +255,7 @@ const listingsDatabase = [
     category: "vehicles",
     location: "No. 45, Temple Road, Nallur",
     price: 1500,
+    priceHourly: 200,
     unit: "day",
     rating: 4.6,
     reviews: 5,
@@ -274,6 +283,7 @@ const listingsDatabase = [
 
 let wishlist = new Set();
 let currentAsset = null;
+let currentRentMode = "daily";
 
 document.addEventListener("DOMContentLoaded", () => {
   initMobileMenu();
@@ -446,6 +456,62 @@ function loadAssetDetails() {
   const startDateInput = document.getElementById("booking-start-date");
   const endDateInput = document.getElementById("booking-end-date");
   
+  // Set alternative price display
+  const altPriceSpan = document.getElementById("booking-card-alt-price");
+  if (altPriceSpan) {
+    if (currentAsset.priceHourly) {
+      altPriceSpan.textContent = `or LKR ${currentAsset.priceHourly.toLocaleString()} / hour`;
+      altPriceSpan.style.display = "block";
+    } else {
+      altPriceSpan.style.display = "none";
+    }
+  }
+
+  // Toggle Daily vs Hourly inputs
+  const btnRentDaily = document.getElementById("btn-rent-daily");
+  const btnRentHourly = document.getElementById("btn-rent-hourly");
+  const dailyInputs = document.getElementById("booking-daily-inputs");
+  const hourlyInputs = document.getElementById("booking-hourly-inputs");
+
+  if (btnRentDaily && btnRentHourly) {
+    btnRentDaily.addEventListener("click", () => {
+      currentRentMode = "daily";
+      btnRentDaily.style.background = "var(--primary-dark)";
+      btnRentDaily.style.color = "white";
+      btnRentHourly.style.background = "transparent";
+      btnRentHourly.style.color = "var(--text-light)";
+      if (dailyInputs) dailyInputs.style.display = "grid";
+      if (hourlyInputs) hourlyInputs.style.display = "none";
+      
+      // Update price display to daily
+      document.getElementById("booking-card-price").textContent = `LKR ${currentAsset.price.toLocaleString()}`;
+      document.getElementById("booking-card-unit").textContent = `/ ${currentAsset.unit}`;
+      if (altPriceSpan && currentAsset.priceHourly) {
+        altPriceSpan.textContent = `or LKR ${currentAsset.priceHourly.toLocaleString()} / hour`;
+      }
+      recalculateTotals();
+    });
+
+    btnRentHourly.addEventListener("click", () => {
+      currentRentMode = "hourly";
+      btnRentHourly.style.background = "var(--primary-dark)";
+      btnRentHourly.style.color = "white";
+      btnRentDaily.style.background = "transparent";
+      btnRentDaily.style.color = "var(--text-light)";
+      if (dailyInputs) dailyInputs.style.display = "none";
+      if (hourlyInputs) hourlyInputs.style.display = "block";
+      
+      // Update price display to hourly
+      const hrPrice = currentAsset.priceHourly || Math.round(currentAsset.price / 8);
+      document.getElementById("booking-card-price").textContent = `LKR ${hrPrice.toLocaleString()}`;
+      document.getElementById("booking-card-unit").textContent = `/ hour`;
+      if (altPriceSpan) {
+        altPriceSpan.textContent = `or LKR ${currentAsset.price.toLocaleString()} / ${currentAsset.unit}`;
+      }
+      recalculateTotals();
+    });
+  }
+
   if (startDateInput && endDateInput) {
     startDateInput.min = today;
     startDateInput.value = today;
@@ -467,9 +533,24 @@ function loadAssetDetails() {
     });
     
     endDateInput.addEventListener("change", recalculateTotals);
-    
-    recalculateTotals();
   }
+
+  // Set today for hourly date input
+  const rentDateInput = document.getElementById("booking-rent-date");
+  const rentTimeInput = document.getElementById("booking-rent-time");
+  const rentHoursInput = document.getElementById("booking-rent-hours");
+  if (rentDateInput) {
+    rentDateInput.min = today;
+    rentDateInput.value = today;
+    rentDateInput.addEventListener("change", recalculateTotals);
+  }
+  if (rentTimeInput) rentTimeInput.addEventListener("change", recalculateTotals);
+  if (rentHoursInput) {
+    rentHoursInput.addEventListener("input", recalculateTotals);
+    rentHoursInput.addEventListener("change", recalculateTotals);
+  }
+
+  recalculateTotals();
 }
 
 // 3. RECALCULATE DYNAMIC TOTALS
@@ -481,26 +562,34 @@ function recalculateTotals() {
   
   if (!startDateInput || !endDateInput) return;
   
-  const start = new Date(startDateInput.value);
-  const end = new Date(endDateInput.value);
-  
+  let baseCost = 0;
+  let deposit = 0;
   let duration = 1;
-  if (currentAsset.unit === "month") {
-    // Estimate in months, min 1
-    const months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
-    duration = Math.max(1, months || 1);
+
+  if (currentRentMode === "daily") {
+    const start = new Date(startDateInput.value);
+    const end = new Date(endDateInput.value);
+    if (currentAsset.unit === "month") {
+      const months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+      duration = Math.max(1, months || 1);
+    } else {
+      const diffTime = Math.abs(end - start);
+      duration = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+    }
+    baseCost = currentAsset.price * duration;
+    deposit = Math.round(currentAsset.price * 0.5);
+    document.getElementById("summary-duration-label").innerHTML = `LKR ${currentAsset.price.toLocaleString()} &times; ${duration} ${currentAsset.unit}(s)`;
   } else {
-    // Default is day
-    const diffTime = Math.abs(end - start);
-    duration = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+    const hours = parseInt(document.getElementById("booking-rent-hours").value) || 1;
+    const hrPrice = currentAsset.priceHourly || Math.round(currentAsset.price / 8);
+    baseCost = hrPrice * hours;
+    deposit = Math.round(hrPrice * hours * 0.5);
+    document.getElementById("summary-duration-label").innerHTML = `LKR ${hrPrice.toLocaleString()} &times; ${hours} hour(s)`;
   }
   
-  const baseCost = currentAsset.price * duration;
   const platformFee = Math.round(baseCost * 0.05);
-  const deposit = Math.round(currentAsset.price * 0.5);
   const grandTotal = baseCost + platformFee + deposit;
   
-  document.getElementById("summary-duration-label").innerHTML = `LKR ${currentAsset.price.toLocaleString()} &times; ${duration} ${currentAsset.unit}(s)`;
   document.getElementById("summary-base-total").textContent = `LKR ${baseCost.toLocaleString()}`;
   document.getElementById("summary-platform-fee").textContent = `LKR ${platformFee.toLocaleString()}`;
   document.getElementById("summary-deposit").textContent = `LKR ${deposit.toLocaleString()}`;
@@ -540,8 +629,6 @@ function initModals() {
     bookingBtn.addEventListener("click", (e) => {
       e.preventDefault();
       
-      const start = document.getElementById("booking-start-date").value;
-      const end = document.getElementById("booking-end-date").value;
       const userName = document.getElementById("booking-user-name").value.trim();
       const userPhone = document.getElementById("booking-user-contact").value.trim();
       
@@ -549,6 +636,19 @@ function initModals() {
         alert("Please provide your Name and Mobile Number to check availability.");
         document.getElementById("booking-user-name").focus();
         return;
+      }
+
+      let checkoutUrl = `checkout.html?id=${currentAsset.id}&name=${encodeURIComponent(userName)}&phone=${encodeURIComponent(userPhone)}`;
+      
+      if (currentRentMode === "daily") {
+        const start = document.getElementById("booking-start-date").value;
+        const end = document.getElementById("booking-end-date").value;
+        checkoutUrl += `&rentMode=daily&start=${start}&end=${end}`;
+      } else {
+        const start = document.getElementById("booking-rent-date").value;
+        const time = document.getElementById("booking-rent-time").value;
+        const hours = document.getElementById("booking-rent-hours").value;
+        checkoutUrl += `&rentMode=hourly&start=${start}&time=${time}&hours=${hours}`;
       }
       
       const originalText = bookingBtn.innerHTML;
@@ -558,7 +658,7 @@ function initModals() {
       setTimeout(() => {
         bookingBtn.disabled = false;
         bookingBtn.innerHTML = originalText;
-        window.location.href = `checkout.html?id=${currentAsset.id}&start=${start}&end=${end}&name=${encodeURIComponent(userName)}&phone=${encodeURIComponent(userPhone)}`;
+        window.location.href = checkoutUrl;
       }, 1000);
     });
   }

@@ -68,10 +68,11 @@ let bookingRequests = [
     renter: "Selva R.",
     assetId: 4,
     assetTitle: "35 kVA Soundproof Diesel Generator",
-    dates: "June 16, 2026 - June 19, 2026",
-    duration: 3,
-    price: 9000,
-    status: "Pending"
+    dates: "June 16, 2026 at 09:00 AM",
+    duration: 4,
+    price: 1600,
+    status: "Pending",
+    rentMode: "hourly"
   },
   {
     id: 102,
@@ -81,7 +82,8 @@ let bookingRequests = [
     dates: "June 18, 2026 - June 20, 2026",
     duration: 2,
     price: 7000,
-    status: "Pending"
+    status: "Pending",
+    rentMode: "daily"
   },
   {
     id: 103,
@@ -91,18 +93,19 @@ let bookingRequests = [
     dates: "July 01, 2026 - August 01, 2026",
     duration: 1,
     price: 2500,
-    status: "Pending"
+    status: "Pending",
+    rentMode: "daily"
   }
 ];
 
 let completedBookings = [
-  { id: 201, assetTitle: "Commercial Cloud Kitchen Space", renter: "Nirmala R.", dates: "May 10 - May 14, 2026", amount: 14000, status: "Paid" },
+  { id: 201, assetTitle: "Commercial Cloud Kitchen Space", renter: "Nirmala R.", dates: "May 10, 2026 (4 hours)", amount: 2000, status: "Paid" },
   { id: 202, assetTitle: "Suzuki Every Mini Van (Dual A/C)", renter: "Mahen T.", dates: "May 22 - May 23, 2026", amount: 6500, status: "Paid" },
   { id: 203, assetTitle: "Secure Dry Storage Room (15x20 ft)", renter: "Jaseem A.", dates: "April 01 - May 01, 2026", amount: 2500, status: "Paid" },
-  { id: 204, assetTitle: "Commercial Cloud Kitchen Space", renter: "Sinthu J.", dates: "April 15 - April 16, 2026", amount: 3500, status: "Paid" },
+  { id: 204, assetTitle: "Commercial Cloud Kitchen Space", renter: "Sinthu J.", dates: "April 15, 2026 (3 hours)", amount: 1500, status: "Paid" },
   { id: 205, assetTitle: "Suzuki Every Mini Van (Dual A/C)", renter: "Selva R.", dates: "April 18 - April 19, 2026", amount: 6500, status: "Paid" },
   { id: 206, assetTitle: "35 kVA Soundproof Diesel Generator", renter: "Anton D.", dates: "March 10 - March 12, 2026", amount: 6000, status: "Paid" },
-  { id: 207, assetTitle: "Commercial Cloud Kitchen Space", renter: "Karthik J.", dates: "March 15 - March 17, 2026", amount: 7000, status: "Paid" },
+  { id: 207, assetTitle: "Commercial Cloud Kitchen Space", renter: "Karthik J.", dates: "March 15, 2026 (6 hours)", amount: 3000, status: "Paid" },
   { id: 208, assetTitle: "Secure Dry Storage Room (15x20 ft)", renter: "Kumar A.", dates: "March 01 - April 01, 2026", amount: 2500, status: "Paid" },
   { id: 209, assetTitle: "Suzuki Every Mini Van (Dual A/C)", renter: "Pradeep T.", dates: "Feb 10 - Feb 11, 2026", amount: 6500, status: "Paid" },
   { id: 210, assetTitle: "Commercial Cloud Kitchen Space", renter: "Vajira N.", dates: "Feb 14 - Feb 15, 2026", amount: 3500, status: "Paid" },
@@ -242,6 +245,7 @@ function renderRequests() {
   }
 
   container.innerHTML = bookingRequests.map(req => {
+    const unitName = req.rentMode === "hourly" ? "hour(s)" : "day(s)";
     return `
       <div class="request-item" id="request-item-${req.id}">
         <div class="request-item-details">
@@ -251,7 +255,7 @@ function renderRequests() {
             <span class="badge badge-teal" style="font-size: 0.65rem; padding: 0.1rem 0.4rem;">Pending Approval</span>
           </div>
           <p class="request-asset-title">${req.assetTitle}</p>
-          <p class="request-dates-range">${req.dates} (${req.duration} day(s))</p>
+          <p class="request-dates-range">${req.dates} (${req.duration} ${unitName})</p>
           <p class="request-total-price">Requested Rent Value: <strong>LKR ${req.price.toLocaleString()}</strong></p>
         </div>
         <div class="request-item-actions">
@@ -281,7 +285,7 @@ window.approveRequest = function(id) {
     id: req.id,
     assetTitle: req.assetTitle,
     renter: req.renter,
-    dates: req.dates,
+    dates: req.rentMode === "hourly" ? `${req.dates} (${req.duration} hours)` : req.dates,
     amount: req.price,
     status: "Confirmed"
   });

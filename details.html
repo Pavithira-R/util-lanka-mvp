@@ -838,8 +838,11 @@
           <div class="booking-sidebar-card">
             
             <div class="booking-card-header">
-              <div class="booking-card-price-display">
-                <span id="booking-card-price">LKR 3,500</span><span id="booking-card-unit">/ day</span>
+              <div class="booking-card-price-display" style="display: flex; flex-direction: column;">
+                <div>
+                  <span id="booking-card-price">LKR 3,500</span><span id="booking-card-unit">/ day</span>
+                </div>
+                <span id="booking-card-alt-price" style="font-size: 0.75rem; color: var(--text-light); font-weight: 500; margin-top: 0.15rem;">or LKR 500 / hour</span>
               </div>
               <div class="booking-card-rating-meta">
                 <span class="star">★</span> <span id="booking-card-rating">4.9</span> <span style="font-weight: 400; color: var(--text-light);" id="booking-card-reviews">(24)</span>
@@ -849,7 +852,14 @@
             <!-- Booking Form -->
             <form class="booking-form" onsubmit="return false;">
               
-              <div class="booking-date-grid">
+              <!-- Rental Mode Selector -->
+              <div class="rental-mode-selector" style="display: flex; background: var(--bg-light); padding: 4px; border-radius: var(--radius-md); border: 1px solid var(--border-light); margin-bottom: 0.5rem;">
+                <button type="button" id="btn-rent-daily" class="rent-mode-btn active" style="flex: 1; padding: 0.5rem; text-align: center; font-size: 0.8rem; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all var(--transition-fast); background: var(--primary-dark); color: white; border: none; outline: none;">Daily Rental</button>
+                <button type="button" id="btn-rent-hourly" class="rent-mode-btn" style="flex: 1; padding: 0.5rem; text-align: center; font-size: 0.8rem; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all var(--transition-fast); background: transparent; color: var(--text-light); border: none; outline: none;">Hourly Rental</button>
+              </div>
+
+              <!-- Daily Booking Inputs -->
+              <div id="booking-daily-inputs" class="booking-date-grid">
                 <div class="form-group">
                   <label for="booking-start-date" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">Start Date</label>
                   <input type="date" id="booking-start-date" class="form-control" style="font-size: 0.85rem;" required>
@@ -857,6 +867,24 @@
                 <div class="form-group">
                   <label for="booking-end-date" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">End Date</label>
                   <input type="date" id="booking-end-date" class="form-control" style="font-size: 0.85rem;" required>
+                </div>
+              </div>
+
+              <!-- Hourly Booking Inputs -->
+              <div id="booking-hourly-inputs" style="display: none;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                  <div class="form-group">
+                    <label for="booking-rent-date" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">Rent Date</label>
+                    <input type="date" id="booking-rent-date" class="form-control" style="font-size: 0.85rem;">
+                  </div>
+                  <div class="form-group">
+                    <label for="booking-rent-time" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">Start Time</label>
+                    <input type="time" id="booking-rent-time" class="form-control" style="font-size: 0.85rem;" value="09:00">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="booking-rent-hours" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">Duration (Hours)</label>
+                  <input type="number" id="booking-rent-hours" class="form-control" style="font-size: 0.85rem;" min="1" max="24" value="4">
                 </div>
               </div>
 

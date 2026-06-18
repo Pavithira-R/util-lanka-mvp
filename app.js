@@ -6,6 +6,7 @@ const listingsDatabase = [
     category: "kitchens",
     location: "No. 12, Hospital Road, Jaffna",
     price: 3500,
+    priceHourly: 500,
     unit: "day",
     rating: 4.9,
     reviews: 24,
@@ -19,6 +20,7 @@ const listingsDatabase = [
     category: "vehicles",
     location: "No. 15, Kokuvil East, Jaffna",
     price: 6500,
+    priceHourly: 800,
     unit: "day",
     rating: 4.8,
     reviews: 18,
@@ -32,6 +34,7 @@ const listingsDatabase = [
     category: "vehicles",
     location: "No. 18, KKS Road, Chunnakam",
     price: 2000,
+    priceHourly: 300,
     unit: "day",
     rating: 4.75,
     reviews: 15,
@@ -45,6 +48,7 @@ const listingsDatabase = [
     category: "equipment",
     location: "No. 27, Station Road, Kilinochchi",
     price: 3000,
+    priceHourly: 400,
     unit: "day",
     rating: 4.9,
     reviews: 20,
@@ -58,6 +62,7 @@ const listingsDatabase = [
     category: "equipment",
     location: "No. 45, Temple Road, Nallur",
     price: 4500,
+    priceHourly: 600,
     unit: "day",
     rating: 4.95,
     reviews: 14,
@@ -71,6 +76,7 @@ const listingsDatabase = [
     category: "storage",
     location: "No. 8, Mannar Road, Vavuniya",
     price: 2500,
+    priceHourly: 50,
     unit: "month",
     rating: 4.8,
     reviews: 11,
@@ -84,6 +90,7 @@ const listingsDatabase = [
     category: "parking",
     location: "No. 63, Point Pedro Road, Jaffna",
     price: 500,
+    priceHourly: 50,
     unit: "day",
     rating: 4.7,
     reviews: 8,
@@ -97,6 +104,7 @@ const listingsDatabase = [
     category: "kitchens",
     location: "No. 21, Main Street, Mullaitivu",
     price: 3500,
+    priceHourly: 500,
     unit: "day",
     rating: 4.85,
     reviews: 12,
@@ -498,6 +506,7 @@ function initTestimonialSlider() {
 
 // 8. MODAL INTERACTIVE LOGIC (BOOKING & LISTING)
 let currentBookingListing = null;
+let modalRentMode = "daily";
 
 function initModals() {
   const modalOverlays = document.querySelectorAll(".modal-overlay");
@@ -518,6 +527,70 @@ function initModals() {
       }
     });
   });
+
+  // Modal rent mode toggle listeners
+  const modalBtnRentDaily = document.getElementById("modal-btn-rent-daily");
+  const modalBtnRentHourly = document.getElementById("modal-btn-rent-hourly");
+  const modalDailyInputs = document.getElementById("modal-booking-daily-inputs");
+  const modalHourlyInputs = document.getElementById("modal-booking-hourly-inputs");
+
+  if (modalBtnRentDaily && modalBtnRentHourly) {
+    modalBtnRentDaily.addEventListener("click", () => {
+      modalRentMode = "daily";
+      modalBtnRentDaily.style.background = "var(--primary-dark)";
+      modalBtnRentDaily.style.color = "white";
+      modalBtnRentHourly.style.background = "transparent";
+      modalBtnRentHourly.style.color = "var(--text-light)";
+      if (modalDailyInputs) modalDailyInputs.style.display = "flex";
+      if (modalHourlyInputs) modalHourlyInputs.style.display = "none";
+      
+      if (currentBookingListing) {
+        document.getElementById("booking-asset-rate").textContent = `LKR ${currentBookingListing.price.toLocaleString()} / ${currentBookingListing.unit}`;
+        updateBookingSummary(currentBookingListing);
+      }
+    });
+
+    modalBtnRentHourly.addEventListener("click", () => {
+      modalRentMode = "hourly";
+      modalBtnRentHourly.style.background = "var(--primary-dark)";
+      modalBtnRentHourly.style.color = "white";
+      modalBtnRentDaily.style.background = "transparent";
+      modalBtnRentDaily.style.color = "var(--text-light)";
+      if (modalDailyInputs) modalDailyInputs.style.display = "none";
+      if (modalHourlyInputs) modalHourlyInputs.style.display = "block";
+      
+      if (currentBookingListing) {
+        const hrPrice = currentBookingListing.priceHourly || Math.round(currentBookingListing.price / 8);
+        document.getElementById("booking-asset-rate").textContent = `LKR ${hrPrice.toLocaleString()} / hour`;
+        updateBookingSummary(currentBookingListing);
+      }
+    });
+  }
+
+  // Bind change listeners to hourly inputs inside modal
+  const modalRentDate = document.getElementById("booking-rent-date");
+  const modalRentTime = document.getElementById("booking-rent-time");
+  const modalRentHours = document.getElementById("booking-rent-hours");
+  if (modalRentDate) {
+    modalRentDate.value = new Date().toISOString().split("T")[0];
+    modalRentDate.min = new Date().toISOString().split("T")[0];
+    modalRentDate.addEventListener("change", () => {
+      if (currentBookingListing) updateBookingSummary(currentBookingListing);
+    });
+  }
+  if (modalRentTime) {
+    modalRentTime.addEventListener("change", () => {
+      if (currentBookingListing) updateBookingSummary(currentBookingListing);
+    });
+  }
+  if (modalRentHours) {
+    modalRentHours.addEventListener("input", () => {
+      if (currentBookingListing) updateBookingSummary(currentBookingListing);
+    });
+    modalRentHours.addEventListener("change", () => {
+      if (currentBookingListing) updateBookingSummary(currentBookingListing);
+    });
+  }
 
   // Listing modal trigger
   const listAssetBtns = document.querySelectorAll(".list-asset-trigger");
@@ -566,12 +639,27 @@ function openBookingModal(listingId) {
   if (!listing) return;
   
   currentBookingListing = listing;
+  modalRentMode = "daily";
   
   const modal = document.getElementById("booking-modal");
   const titleSpan = document.getElementById("booking-asset-title");
   const rateSpan = document.getElementById("booking-asset-rate");
   const durationLabel = document.getElementById("booking-duration-label");
   const durationInput = document.getElementById("booking-duration");
+
+  const modalBtnRentDaily = document.getElementById("modal-btn-rent-daily");
+  const modalBtnRentHourly = document.getElementById("modal-btn-rent-hourly");
+  const modalDailyInputs = document.getElementById("modal-booking-daily-inputs");
+  const modalHourlyInputs = document.getElementById("modal-booking-hourly-inputs");
+
+  if (modalBtnRentDaily && modalBtnRentHourly) {
+    modalBtnRentDaily.style.background = "var(--primary-dark)";
+    modalBtnRentDaily.style.color = "white";
+    modalBtnRentHourly.style.background = "transparent";
+    modalBtnRentHourly.style.color = "var(--text-light)";
+    if (modalDailyInputs) modalDailyInputs.style.display = "flex";
+    if (modalHourlyInputs) modalHourlyInputs.style.display = "none";
+  }
   
   titleSpan.textContent = listing.title;
   rateSpan.textContent = `LKR ${listing.price.toLocaleString()} / ${listing.unit}`;
@@ -590,13 +678,25 @@ function openBookingModal(listingId) {
 }
 
 function updateBookingSummary(listing) {
-  const duration = parseInt(document.getElementById("booking-duration").value) || 1;
-  const baseCost = listing.price * duration;
+  let baseCost = 0;
+  let deposit = 0;
+  
+  if (modalRentMode === "daily") {
+    const duration = parseInt(document.getElementById("booking-duration").value) || 1;
+    baseCost = listing.price * duration;
+    deposit = Math.round(listing.price * 0.5);
+    document.getElementById("summary-base-rate").innerHTML = `LKR ${listing.price.toLocaleString()} &times; ${duration} ${listing.unit}(s)`;
+  } else {
+    const hours = parseInt(document.getElementById("booking-rent-hours").value) || 1;
+    const hrPrice = listing.priceHourly || Math.round(listing.price / 8);
+    baseCost = hrPrice * hours;
+    deposit = Math.round(hrPrice * hours * 0.5);
+    document.getElementById("summary-base-rate").innerHTML = `LKR ${hrPrice.toLocaleString()} &times; ${hours} hour(s)`;
+  }
+  
   const platformFee = Math.round(baseCost * 0.05); // 5% fee
-  const deposit = Math.round(listing.price * 0.5); // 50% ref deposit
   const grandTotal = baseCost + platformFee + deposit;
   
-  document.getElementById("summary-base-rate").innerHTML = `LKR ${listing.price.toLocaleString()} &times; ${duration} ${listing.unit}(s)`;
   document.getElementById("summary-base-total").textContent = `LKR ${baseCost.toLocaleString()}`;
   document.getElementById("summary-platform-fee").textContent = `LKR ${platformFee.toLocaleString()}`;
   document.getElementById("summary-deposit").textContent = `LKR ${deposit.toLocaleString()}`;
@@ -623,6 +723,22 @@ function submitBooking() {
     const refCode = "UTL-" + Math.floor(100000 + Math.random() * 900000);
     document.getElementById("booking-ref-code").innerHTML = `<strong>Reference ID:</strong> ${refCode}`;
     
+    // Customize success screen paragraph based on selection
+    const successIllustrationDiv = document.querySelector("#booking-success-content .success-illustration");
+    if (successIllustrationDiv) {
+      const pElements = successIllustrationDiv.querySelectorAll("p");
+      if (pElements.length > 0) {
+        if (modalRentMode === "hourly") {
+          const dateVal = document.getElementById("booking-rent-date").value;
+          const timeVal = document.getElementById("booking-rent-time").value;
+          const hoursVal = document.getElementById("booking-rent-hours").value;
+          pElements[0].textContent = `Your hourly request has been sent to the host. We have held the hourly slot on ${dateVal} at ${timeVal} for ${hoursVal} hours.`;
+        } else {
+          pElements[0].textContent = `Your request has been sent to the host. We have held the booking slot temporarily.`;
+        }
+      }
+    }
+
     // Reset button
     submitBtn.disabled = false;
     submitBtn.innerHTML = originalText;
