@@ -427,6 +427,7 @@ function initModals() {
       modalBtnRentHourly.style.color = "var(--text-light)";
       if (modalDailyInputs) modalDailyInputs.style.display = "flex";
       if (modalHourlyInputs) modalHourlyInputs.style.display = "none";
+      setBookingInputsRequired("daily");
       
       if (currentBookingListing) {
         document.getElementById("booking-asset-rate").textContent = `LKR ${currentBookingListing.price.toLocaleString()} / ${currentBookingListing.unit}`;
@@ -442,6 +443,7 @@ function initModals() {
       modalBtnRentDaily.style.color = "var(--text-light)";
       if (modalDailyInputs) modalDailyInputs.style.display = "none";
       if (modalHourlyInputs) modalHourlyInputs.style.display = "block";
+      setBookingInputsRequired("hourly");
       
       if (currentBookingListing) {
         const hrPrice = currentBookingListing.priceHourly || Math.round(currentBookingListing.price / 8);
@@ -543,6 +545,7 @@ function openBookingModal(listingId) {
     modalBtnRentHourly.style.color = "var(--text-light)";
     if (modalDailyInputs) modalDailyInputs.style.display = "flex";
     if (modalHourlyInputs) modalHourlyInputs.style.display = "none";
+    setBookingInputsRequired("daily");
   }
   
   titleSpan.textContent = listing.title;
@@ -598,6 +601,9 @@ function submitBooking() {
   
   // Simulate API delay
   setTimeout(() => {
+    // Send the request to the host dashboard (before form.reset() clears the inputs)
+    addBookingRequestFromModal(currentBookingListing, modalRentMode);
+
     // Show success content
     document.getElementById("booking-form-content").style.display = "none";
     document.getElementById("booking-success-content").style.display = "block";

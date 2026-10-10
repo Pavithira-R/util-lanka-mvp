@@ -305,6 +305,7 @@ function initModals() {
       modalBtnRentHourly.style.color = "var(--text-light)";
       if (modalDailyInputs) modalDailyInputs.style.display = "flex";
       if (modalHourlyInputs) modalHourlyInputs.style.display = "none";
+      setBookingInputsRequired("daily");
       
       if (currentBookingListing) {
         document.getElementById("booking-asset-rate").textContent = `LKR ${currentBookingListing.price.toLocaleString()} / ${currentBookingListing.unit}`;
@@ -320,6 +321,7 @@ function initModals() {
       modalBtnRentDaily.style.color = "var(--text-light)";
       if (modalDailyInputs) modalDailyInputs.style.display = "none";
       if (modalHourlyInputs) modalHourlyInputs.style.display = "block";
+      setBookingInputsRequired("hourly");
       
       if (currentBookingListing) {
         const hrPrice = currentBookingListing.priceHourly || Math.round(currentBookingListing.price / 8);
@@ -378,6 +380,9 @@ function initModals() {
       submitBtn.innerHTML = `<svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="animation: spin 1s linear infinite; margin-right: 8px;"><circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.2)"></circle><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path></svg> Confirming...`;
       
       setTimeout(() => {
+        // Send the request to the host dashboard (before bookingForm.reset() clears the inputs)
+        addBookingRequestFromModal(currentBookingListing, modalRentMode);
+
         document.getElementById("booking-form-content").style.display = "none";
         document.getElementById("booking-success-content").style.display = "block";
         setModalFooterDisplay(document.getElementById("booking-modal"), "none");
@@ -488,6 +493,7 @@ function openBookingModal(listingId) {
     modalBtnRentHourly.style.color = "var(--text-light)";
     if (modalDailyInputs) modalDailyInputs.style.display = "flex";
     if (modalHourlyInputs) modalHourlyInputs.style.display = "none";
+    setBookingInputsRequired("daily");
   }
   
   titleSpan.textContent = listing.title;

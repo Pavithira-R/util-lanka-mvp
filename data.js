@@ -487,9 +487,214 @@ function publishListing({ title, category, location, price, unit, description },
   return listing;
 }
 
+// ---------------------------------------------------------------------------
+// Host dashboard data. Any page can add a booking request; the dashboard shows it.
+// ---------------------------------------------------------------------------
+
+// Default mock data seeding for the demo (used until the dashboard state is first saved)
+const DEFAULT_HOST_LISTINGS = [
+  {
+    id: 1,
+    title: "Commercial Cloud Kitchen Space",
+    category: "kitchens",
+    location: "No. 12, Hospital Road, Jaffna",
+    price: 3500,
+    unit: "day",
+    status: "Active",
+    earnings: 14000,
+    rating: 4.9,
+    reviews: 24,
+    image: "assets/Commercial Cloud Kitchen Space.jpeg"
+  },
+  {
+    id: 2,
+    title: "Suzuki Every Mini Van (Dual A/C)",
+    category: "vehicles",
+    location: "No. 15, Kokuvil East, Jaffna",
+    price: 6500,
+    unit: "day",
+    status: "Active",
+    earnings: 6500,
+    rating: 4.8,
+    reviews: 18,
+    image: "assets/Suzuki Every Mini Van (Dual AC).jpg"
+  },
+  {
+    id: 4,
+    title: "35 kVA Soundproof Diesel Generator",
+    category: "equipment",
+    location: "No. 27, Station Road, Kilinochchi",
+    price: 3000,
+    unit: "day",
+    status: "Active",
+    earnings: 0,
+    rating: 4.9,
+    reviews: 20,
+    image: "assets/35 kVA Soundproof Diesel Generator.jpeg"
+  },
+  {
+    id: 6,
+    title: "Secure Dry Storage Room (15x20 ft)",
+    category: "storage",
+    location: "No. 8, Mannar Road, Vavuniya",
+    price: 2500,
+    unit: "month",
+    status: "Paused",
+    earnings: 4000,
+    rating: 4.8,
+    reviews: 11,
+    image: "assets/Secure Dry Storage Room (15x20 ft).jpeg"
+  }
+];
+
+const DEFAULT_BOOKING_REQUESTS = [
+  {
+    id: 101,
+    renter: "Selva R.",
+    renterNic: "912345678V",
+    assetId: 4,
+    assetTitle: "35 kVA Soundproof Diesel Generator",
+    dates: "June 16, 2026 at 09:00 AM",
+    duration: 4,
+    price: 1600,
+    status: "Pending",
+    rentMode: "hourly"
+  },
+  {
+    id: 102,
+    renter: "Thilak S.",
+    renterNic: "751928374V",
+    assetId: 1,
+    assetTitle: "Commercial Cloud Kitchen Space",
+    dates: "June 18, 2026 - June 20, 2026",
+    duration: 2,
+    price: 7000,
+    status: "Pending",
+    rentMode: "daily"
+  },
+  {
+    id: 103,
+    renter: "Kumar A.",
+    renterNic: "198829304192",
+    assetId: 6,
+    assetTitle: "Secure Dry Storage Room (15x20 ft)",
+    dates: "July 01, 2026 - August 01, 2026",
+    duration: 1,
+    price: 2500,
+    status: "Pending",
+    rentMode: "daily"
+  }
+];
+
+const DEFAULT_COMPLETED_BOOKINGS = [
+  { id: 201, assetTitle: "Commercial Cloud Kitchen Space", renter: "Nirmala R.", dates: "May 10, 2026 (4 hours)", amount: 2000, status: "Paid" },
+  { id: 202, assetTitle: "Suzuki Every Mini Van (Dual A/C)", renter: "Mahen T.", dates: "May 22 - May 23, 2026", amount: 6500, status: "Paid" },
+  { id: 203, assetTitle: "Secure Dry Storage Room (15x20 ft)", renter: "Jaseem A.", dates: "April 01 - May 01, 2026", amount: 2500, status: "Paid" },
+  { id: 204, assetTitle: "Commercial Cloud Kitchen Space", renter: "Sinthu J.", dates: "April 15, 2026 (3 hours)", amount: 1500, status: "Paid" },
+  { id: 205, assetTitle: "Suzuki Every Mini Van (Dual A/C)", renter: "Selva R.", dates: "April 18 - April 19, 2026", amount: 6500, status: "Paid" },
+  { id: 206, assetTitle: "35 kVA Soundproof Diesel Generator", renter: "Anton D.", dates: "March 10 - March 12, 2026", amount: 6000, status: "Paid" },
+  { id: 207, assetTitle: "Commercial Cloud Kitchen Space", renter: "Karthik J.", dates: "March 15, 2026 (6 hours)", amount: 3000, status: "Paid" },
+  { id: 208, assetTitle: "Secure Dry Storage Room (15x20 ft)", renter: "Kumar A.", dates: "March 01 - April 01, 2026", amount: 2500, status: "Paid" },
+  { id: 209, assetTitle: "Suzuki Every Mini Van (Dual A/C)", renter: "Pradeep T.", dates: "Feb 10 - Feb 11, 2026", amount: 6500, status: "Paid" },
+  { id: 210, assetTitle: "Commercial Cloud Kitchen Space", renter: "Vajira N.", dates: "Feb 14 - Feb 15, 2026", amount: 3500, status: "Paid" },
+  { id: 211, assetTitle: "35 kVA Soundproof Diesel Generator", renter: "Anton D.", dates: "Jan 12 - Jan 14, 2026", amount: 6000, status: "Paid" },
+  { id: 212, assetTitle: "Commercial Cloud Kitchen Space", renter: "Thilak S.", dates: "Jan 20 - Jan 22, 2026", amount: 7000, status: "Paid" }
+];
+
+const DEFAULT_STATS = {
+  totalListings: 4,
+  activeBookings: 2,
+  monthlyEarnings: 24500,
+  pendingRequests: 3
+};
+
+const DEFAULT_NOTIFICATIONS = [
+  { time: "Just now", text: "New booking request from Selva R. for Generator" },
+  { time: "1 hour ago", text: "NIC Profile Verification approved by Util Lanka team" },
+  { time: "Yesterday", text: "Payout of LKR 14,000 processed to Bank of Ceylon account" },
+  { time: "2 days ago", text: "New 5-star review received from Mahen T. for Mini Van" }
+];
+
+function loadStored(key, fallback) {
+  try {
+    // Copy the fallback so callers can modify it without changing the defaults
+    return JSON.parse(localStorage.getItem(key)) || structuredClone(fallback);
+  } catch (e) {
+    return structuredClone(fallback);
+  }
+}
+
+// Saves a renter's request so it appears under Booking Requests on the host dashboard
+function addBookingRequest({ renter, renterNic, renterPhone, asset, dates, duration, price, rentMode }) {
+  const requests = loadStored("bookingRequests", DEFAULT_BOOKING_REQUESTS);
+  const stats = loadStored("dashboardStats", DEFAULT_STATS);
+  const notifications = loadStored("dashboardNotifications", DEFAULT_NOTIFICATIONS);
+
+  const request = {
+    id: Math.max(100, ...requests.map(r => r.id)) + 1,
+    renter: renter,
+    renterNic: renterNic || "",
+    renterPhone: renterPhone || "",
+    assetId: asset.id,
+    assetTitle: asset.title,
+    dates: dates,
+    duration: duration,
+    price: price,
+    status: "Pending",
+    rentMode: rentMode
+  };
+
+  requests.unshift(request);
+  stats.pendingRequests += 1;
+  notifications.unshift({ time: "Just now", text: `New booking request from ${renter} for ${asset.title}` });
+
+  try {
+    localStorage.setItem("bookingRequests", JSON.stringify(requests));
+    localStorage.setItem("dashboardStats", JSON.stringify(stats));
+    localStorage.setItem("dashboardNotifications", JSON.stringify(notifications));
+  } catch (err) {
+    console.error("Local storage error:", err);
+  }
+  return request;
+}
+
+// Saves the request from the quick "Book" modal on the home and marketplace pages
+function addBookingRequestFromModal(listing, rentMode) {
+  const formatDate = value => value
+    ? new Date(value + "T00:00").toLocaleDateString("en-US", { month: "long", day: "2-digit", year: "numeric" })
+    : "Date to be confirmed";
+  const baseTotalText = document.getElementById("summary-base-total").textContent;
+
+  let dates, duration;
+  if (rentMode === "hourly") {
+    dates = `${formatDate(document.getElementById("booking-rent-date").value)} at ${document.getElementById("booking-rent-time").value}`;
+    duration = parseInt(document.getElementById("booking-rent-hours").value) || 1;
+  } else {
+    dates = `From ${formatDate(document.getElementById("booking-start-date").value)}`;
+    duration = parseInt(document.getElementById("booking-duration").value) || 1;
+  }
+
+  return addBookingRequest({
+    renter: document.getElementById("booking-user-name").value.trim(),
+    renterPhone: document.getElementById("booking-user-contact").value.trim(),
+    asset: listing,
+    dates: dates,
+    duration: duration,
+    price: parseInt(baseTotalText.replace(/[^0-9]/g, "")) || 0,
+    rentMode: rentMode
+  });
+}
+
 // Shared UI helper: not every modal has a footer (the List an Asset modal on the
 // home and marketplace pages keeps its buttons inside the form).
 function setModalFooterDisplay(modal, display) {
   const footer = modal && modal.querySelector(".modal-footer");
   if (footer) footer.style.display = display;
+}
+
+// Only the visible rent-mode inputs of the quick booking modal may be required;
+// a required input that is hidden stops the form from submitting.
+function setBookingInputsRequired(mode) {
+  document.querySelectorAll("#modal-booking-daily-inputs input").forEach(input => input.required = mode === "daily");
+  document.querySelectorAll("#modal-booking-hourly-inputs input").forEach(input => input.required = mode === "hourly");
 }

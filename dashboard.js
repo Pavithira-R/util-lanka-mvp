@@ -6,130 +6,6 @@
 // (e.g. GET /api/host/listings) to enforce strict object-level access controls (BOLA).
 // ============================================================================
 
-// Default Mock Data Seeding for the Demo
-const DEFAULT_HOST_LISTINGS = [
-  {
-    id: 1,
-    title: "Commercial Cloud Kitchen Space",
-    category: "kitchens",
-    location: "No. 12, Hospital Road, Jaffna",
-    price: 3500,
-    unit: "day",
-    status: "Active",
-    earnings: 14000,
-    rating: 4.9,
-    reviews: 24,
-    image: "assets/Commercial Cloud Kitchen Space.jpeg"
-  },
-  {
-    id: 2,
-    title: "Suzuki Every Mini Van (Dual A/C)",
-    category: "vehicles",
-    location: "No. 15, Kokuvil East, Jaffna",
-    price: 6500,
-    unit: "day",
-    status: "Active",
-    earnings: 6500,
-    rating: 4.8,
-    reviews: 18,
-    image: "assets/Suzuki Every Mini Van (Dual AC).jpg"
-  },
-  {
-    id: 4,
-    title: "35 kVA Soundproof Diesel Generator",
-    category: "equipment",
-    location: "No. 27, Station Road, Kilinochchi",
-    price: 3000,
-    unit: "day",
-    status: "Active",
-    earnings: 0,
-    rating: 4.9,
-    reviews: 20,
-    image: "assets/35 kVA Soundproof Diesel Generator.jpeg"
-  },
-  {
-    id: 6,
-    title: "Secure Dry Storage Room (15x20 ft)",
-    category: "storage",
-    location: "No. 8, Mannar Road, Vavuniya",
-    price: 2500,
-    unit: "month",
-    status: "Paused",
-    earnings: 4000,
-    rating: 4.8,
-    reviews: 11,
-    image: "assets/Secure Dry Storage Room (15x20 ft).jpeg"
-  }
-];
-
-const DEFAULT_BOOKING_REQUESTS = [
-  {
-    id: 101,
-    renter: "Selva R.",
-    renterNic: "912345678V",
-    assetId: 4,
-    assetTitle: "35 kVA Soundproof Diesel Generator",
-    dates: "June 16, 2026 at 09:00 AM",
-    duration: 4,
-    price: 1600,
-    status: "Pending",
-    rentMode: "hourly"
-  },
-  {
-    id: 102,
-    renter: "Thilak S.",
-    renterNic: "751928374V",
-    assetId: 1,
-    assetTitle: "Commercial Cloud Kitchen Space",
-    dates: "June 18, 2026 - June 20, 2026",
-    duration: 2,
-    price: 7000,
-    status: "Pending",
-    rentMode: "daily"
-  },
-  {
-    id: 103,
-    renter: "Kumar A.",
-    renterNic: "198829304192",
-    assetId: 6,
-    assetTitle: "Secure Dry Storage Room (15x20 ft)",
-    dates: "July 01, 2026 - August 01, 2026",
-    duration: 1,
-    price: 2500,
-    status: "Pending",
-    rentMode: "daily"
-  }
-];
-
-const DEFAULT_COMPLETED_BOOKINGS = [
-  { id: 201, assetTitle: "Commercial Cloud Kitchen Space", renter: "Nirmala R.", dates: "May 10, 2026 (4 hours)", amount: 2000, status: "Paid" },
-  { id: 202, assetTitle: "Suzuki Every Mini Van (Dual A/C)", renter: "Mahen T.", dates: "May 22 - May 23, 2026", amount: 6500, status: "Paid" },
-  { id: 203, assetTitle: "Secure Dry Storage Room (15x20 ft)", renter: "Jaseem A.", dates: "April 01 - May 01, 2026", amount: 2500, status: "Paid" },
-  { id: 204, assetTitle: "Commercial Cloud Kitchen Space", renter: "Sinthu J.", dates: "April 15, 2026 (3 hours)", amount: 1500, status: "Paid" },
-  { id: 205, assetTitle: "Suzuki Every Mini Van (Dual A/C)", renter: "Selva R.", dates: "April 18 - April 19, 2026", amount: 6500, status: "Paid" },
-  { id: 206, assetTitle: "35 kVA Soundproof Diesel Generator", renter: "Anton D.", dates: "March 10 - March 12, 2026", amount: 6000, status: "Paid" },
-  { id: 207, assetTitle: "Commercial Cloud Kitchen Space", renter: "Karthik J.", dates: "March 15, 2026 (6 hours)", amount: 3000, status: "Paid" },
-  { id: 208, assetTitle: "Secure Dry Storage Room (15x20 ft)", renter: "Kumar A.", dates: "March 01 - April 01, 2026", amount: 2500, status: "Paid" },
-  { id: 209, assetTitle: "Suzuki Every Mini Van (Dual A/C)", renter: "Pradeep T.", dates: "Feb 10 - Feb 11, 2026", amount: 6500, status: "Paid" },
-  { id: 210, assetTitle: "Commercial Cloud Kitchen Space", renter: "Vajira N.", dates: "Feb 14 - Feb 15, 2026", amount: 3500, status: "Paid" },
-  { id: 211, assetTitle: "35 kVA Soundproof Diesel Generator", renter: "Anton D.", dates: "Jan 12 - Jan 14, 2026", amount: 6000, status: "Paid" },
-  { id: 212, assetTitle: "Commercial Cloud Kitchen Space", renter: "Thilak S.", dates: "Jan 20 - Jan 22, 2026", amount: 7000, status: "Paid" }
-];
-
-const DEFAULT_STATS = {
-  totalListings: 4,
-  activeBookings: 2,
-  monthlyEarnings: 24500,
-  pendingRequests: 3
-};
-
-const DEFAULT_NOTIFICATIONS = [
-  { time: "Just now", text: "New booking request from Selva R. for Generator" },
-  { time: "1 hour ago", text: "NIC Profile Verification approved by Util Lanka team" },
-  { time: "Yesterday", text: "Payout of LKR 14,000 processed to Bank of Ceylon account" },
-  { time: "2 days ago", text: "New 5-star review received from Mahen T. for Mini Van" }
-];
-
 // Load dataset from LocalStorage or seed with defaults
 let hostListings = JSON.parse(localStorage.getItem("hostListings")) || DEFAULT_HOST_LISTINGS;
 let bookingRequests = JSON.parse(localStorage.getItem("bookingRequests")) || DEFAULT_BOOKING_REQUESTS;
@@ -302,7 +178,7 @@ function renderRequests() {
             <span class="request-renter-avatar">${req.renter.charAt(0)}</span>
             <strong class="request-renter-name">${req.renter}</strong>
             <span class="badge badge-teal" style="font-size: 0.65rem; padding: 0.1rem 0.4rem;">Pending Approval</span>
-            <span class="badge" style="font-size: 0.65rem; padding: 0.1rem 0.4rem; background-color: rgba(20, 184, 166, 0.08); color: var(--accent-teal); font-weight: 700; border: 1px solid rgba(20, 184, 166, 0.2);">NIC Verified: ${req.renterNic || 'N/A'}</span>
+            <span class="badge" style="font-size: 0.65rem; padding: 0.1rem 0.4rem; background-color: rgba(20, 184, 166, 0.08); color: var(--accent-teal); font-weight: 700; border: 1px solid rgba(20, 184, 166, 0.2);">${req.renterNic ? `NIC Verified: ${req.renterNic}` : "NIC check pending"}</span>
           </div>
           <p class="request-asset-title">${req.assetTitle}</p>
           <p class="request-dates-range">${req.dates} (${req.duration} ${unitName})</p>
