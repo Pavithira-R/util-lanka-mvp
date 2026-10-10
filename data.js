@@ -691,3 +691,16 @@ function setBookingInputsRequired(mode) {
   document.querySelectorAll("#modal-booking-daily-inputs input").forEach(input => input.required = mode === "daily");
   document.querySelectorAll("#modal-booking-hourly-inputs input").forEach(input => input.required = mode === "hourly");
 }
+
+// Everything the demo saves in the browser; cleared by the dashboard's "Reset Demo Data" button
+const DEMO_STORAGE_KEYS = [USER_LISTINGS_KEY, "hostListings", "bookingRequests", "completedBookings", "dashboardStats", "dashboardNotifications"];
+
+function resetDemoData() {
+  DEMO_STORAGE_KEYS.forEach(key => {
+    try {
+      localStorage.removeItem(key);
+    } catch (e) {
+      // Storage unavailable: nothing to clear
+    }
+  });
+}

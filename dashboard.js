@@ -60,7 +60,20 @@ document.addEventListener("DOMContentLoaded", () => {
   renderNotifications();
   initPeakSeasonToggle();
   initModals();
+  initResetDemo();
 });
+
+// Clears everything saved during a demo run and reloads with the seed data
+function initResetDemo() {
+  const resetBtn = document.getElementById("btn-reset-demo");
+  if (!resetBtn) return;
+
+  resetBtn.addEventListener("click", () => {
+    if (!confirm("Reset the demo? This removes listings and booking requests made in this browser.")) return;
+    resetDemoData();
+    window.location.reload();
+  });
+}
 
 // 1. MOBILE MENU DRAWER
 function initMobileMenu() {
