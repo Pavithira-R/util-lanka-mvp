@@ -658,32 +658,14 @@ function submitNewListing() {
   submitBtn.disabled = true;
   submitBtn.innerHTML = `<svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="animation: spin 1s linear infinite; margin-right: 8px;"><circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.2)"></circle><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path></svg> Publishing...`;
   
-  setTimeout(() => {
-    // Select placeholder image based on category
-    let image = "assets/Commercial Cloud Kitchen Space.jpeg";
-    if (category === "vehicles") image = "assets/Suzuki Every Mini Van (Dual AC).jpg";
-    else if (category === "equipment") image = "assets/35 kVA Soundproof Diesel Generator.jpeg";
-    else if (category === "storage") image = "assets/Secure Dry Storage Room (15x20 ft).jpeg";
-    else if (category === "parking") image = "assets/Gated Commercial Parking Space.jpg";
+  // Read the uploaded photos while the spinner shows (form.reset() below clears them)
+  const imagesReady = getListingImages();
+  const minDelay = new Promise(resolve => setTimeout(resolve, 1800));
 
-    const newId = listingsDatabase.length + 1;
-    const newListing = {
-      id: newId,
-      title: title,
-      category: category,
-      location: location,
-      price: price,
-      unit: unit,
-      rating: 5.0,
-      reviews: 0,
-      specs: { size: "Standard size", availability: "Immediate" },
-      image: image,
-      description: description
-    };
-    
-    // Insert into db array at beginning so it shows in preview
-    listingsDatabase.unshift(newListing);
-    
+  Promise.all([imagesReady, minDelay]).then(([images]) => {
+    // Saves the listing and inserts it at the start of listingsDatabase
+    publishListing({ title, category, location, price, unit, description }, images);
+
     // Refresh listing elements on dashboard
     initListingRenderer(listingsDatabase);
     
@@ -696,7 +678,7 @@ function submitNewListing() {
     submitBtn.disabled = false;
     submitBtn.innerHTML = originalText;
     form.reset();
-  }, 1800);
+  });
 }
 
 // Spin CSS keyframes (handled in JS since it's a dynamic spinner icon)

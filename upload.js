@@ -2,6 +2,31 @@ document.addEventListener("DOMContentLoaded", () => {
   initImageUpload();
 });
 
+// Returns the selected listing photos as data URLs. Replaced by initImageUpload when the page has an upload form.
+let getListingImages = () => Promise.resolve([]);
+
+// Downscale a photo so a few of them fit in localStorage
+function compressImage(file, maxSize = 900, quality = 0.75) {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL("image/jpeg", quality));
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(null);
+    };
+    img.src = url;
+  });
+}
+
 function initImageUpload() {
   const listingForm = document.getElementById("modal-listing-form");
   if (!listingForm) return;
@@ -14,6 +39,9 @@ function initImageUpload() {
   if (!dropzone || !fileInput || !previewGrid) return;
 
   let selectedFiles = [];
+
+  getListingImages = () =>
+    Promise.all(selectedFiles.map(file => compressImage(file))).then(images => images.filter(Boolean));
 
   // Trigger file input click
   const triggerFileInput = (e) => {
@@ -127,7 +155,8 @@ function initImageUpload() {
   listingForm.addEventListener("submit", (e) => {
     if (selectedFiles.length === 0) {
       e.preventDefault();
-      e.stopPropagation();
+      // Stop the page's own submit handler (registered on the same form) from publishing
+      e.stopImmediatePropagation();
 
       // Highlight dropzone with error styling
       dropzone.style.borderColor = "#EF4444";

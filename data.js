@@ -408,4 +408,81 @@ const BASE_LISTINGS = [
   }
 ];
 
-const listingsDatabase = BASE_LISTINGS.slice();
+// Listings published by the user are kept in localStorage so they survive reloads
+// and are visible on every page.
+const USER_LISTINGS_KEY = "userListings";
+
+const CATEGORY_PLACEHOLDER_IMAGES = {
+  kitchens: "assets/Commercial Cloud Kitchen Space.jpeg",
+  vehicles: "assets/Suzuki Every Mini Van (Dual AC).jpg",
+  equipment: "assets/35 kVA Soundproof Diesel Generator.jpeg",
+  storage: "assets/Secure Dry Storage Room (15x20 ft).jpeg",
+  parking: "assets/Gated Commercial Parking Space.jpg"
+};
+
+function loadUserListings() {
+  try {
+    return JSON.parse(localStorage.getItem(USER_LISTINGS_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveUserListings(listings) {
+  try {
+    localStorage.setItem(USER_LISTINGS_KEY, JSON.stringify(listings));
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+const listingsDatabase = [...loadUserListings(), ...BASE_LISTINGS];
+
+function nextListingId() {
+  return Math.max(0, ...listingsDatabase.map(item => item.id)) + 1;
+}
+
+// Builds a listing from the "List an Asset" form, saves it and adds it to listingsDatabase.
+// `images` are data URLs of the photos the user uploaded (see upload.js).
+function publishListing({ title, category, location, price, unit, description }, images = []) {
+  const now = new Date();
+  const listing = {
+    id: nextListingId(),
+    title: title,
+    category: category,
+    location: location,
+    price: price,
+    // Hourly rate assumes an 8-hour working day
+    priceHourly: unit === "hour" ? price : Math.max(1, Math.round(price / (unit === "month" ? 240 : 8))),
+    unit: unit,
+    rating: 5.0,
+    reviews: 0,
+    specs: { size: "Standard size", availability: "Immediate" },
+    image: images[0] || CATEGORY_PLACEHOLDER_IMAGES[category] || CATEGORY_PLACEHOLDER_IMAGES.kitchens,
+    images: images,
+    description: description,
+    labels: ["Available Today", "New Listing"],
+    host: {
+      name: "You",
+      joined: `Joined ${now.toLocaleString("en-US", { month: "short", year: "numeric" })}`,
+      responseRate: "New host",
+      responseTime: "within a day",
+      avatar: "Y",
+      phone: "Shared after the host confirms",
+      email: "Shared after the host confirms"
+    },
+    reviewsList: [],
+    createdAt: now.toISOString()
+  };
+
+  // Photos are the bulk of the size; if localStorage is full, keep fewer of them.
+  const saved = loadUserListings();
+  if (!saveUserListings([listing, ...saved]) &&
+      !saveUserListings([{ ...listing, images: images.slice(0, 1) }, ...saved])) {
+    saveUserListings([{ ...listing, images: [], image: CATEGORY_PLACEHOLDER_IMAGES[category] }, ...saved]);
+  }
+
+  listingsDatabase.unshift(listing);
+  return listing;
+}

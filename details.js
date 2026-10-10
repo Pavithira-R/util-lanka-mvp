@@ -101,6 +101,13 @@ function loadAssetDetails() {
     mainImg.alt = currentAsset.title;
     thumb1.src = currentAsset.images[1];
     thumb2.src = currentAsset.images[2];
+  } else if (currentAsset.images && currentAsset.images.length > 0) {
+    // User-published listing with 1-2 photos: reuse them to fill the thumbnails
+    const photos = currentAsset.images;
+    mainImg.src = photos[0];
+    mainImg.alt = currentAsset.title;
+    thumb1.src = photos[1 % photos.length];
+    thumb2.src = photos[2 % photos.length];
   } else {
     mainImg.src = currentAsset.image;
     mainImg.alt = currentAsset.title;
@@ -145,7 +152,11 @@ function loadAssetDetails() {
     { author: "Thilak S.", rating: 5, date: "May 2026", comment: "Excellent facility. Extremely clean, and all equipment was fully functional. Ideal for our catering orders." },
     { author: "Nirmala R.", rating: 4.8, date: "April 2026", comment: "Very convenient location near the teaching hospital. Clean counters and reliable gas supply. Will rent again." }
   ];
-  
+
+  if (reviewsList.length === 0) {
+    reviewsContainer.innerHTML = `<p class="review-comment">No reviews yet. Be the first to rent this asset!</p>`;
+  }
+
   reviewsList.forEach(rev => {
     const revDiv = document.createElement("div");
     revDiv.className = "review-item";
@@ -396,11 +407,24 @@ function initModals() {
       
       const submitBtn = listingForm.querySelector("button[type='submit']");
       const originalText = submitBtn.innerHTML;
-      
+
+      const title = document.getElementById("listing-title-input").value;
+      const category = document.getElementById("listing-category-select").value;
+      const location = document.getElementById("listing-location-select").value;
+      const price = parseInt(document.getElementById("listing-price-input").value);
+      const unit = document.getElementById("listing-unit-select").value;
+      const description = document.getElementById("listing-desc-input").value;
+
       submitBtn.disabled = true;
       submitBtn.innerHTML = `<svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="animation: spin 1s linear infinite; margin-right: 8px;"><circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.2)"></circle><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path></svg> Publishing...`;
-      
-      setTimeout(() => {
+
+      // Read the uploaded photos while the spinner shows (listingForm.reset() below clears them)
+      const imagesReady = getListingImages();
+      const minDelay = new Promise(resolve => setTimeout(resolve, 1500));
+
+      Promise.all([imagesReady, minDelay]).then(([images]) => {
+        publishListing({ title, category, location, price, unit, description }, images);
+
         document.getElementById("listing-form-content").style.display = "none";
         document.getElementById("listing-success-content").style.display = "block";
         document.getElementById("list-asset-modal").querySelector(".modal-footer").style.display = "none";
@@ -408,7 +432,7 @@ function initModals() {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
         listingForm.reset();
-      }, 1500);
+      });
     });
   }
 }

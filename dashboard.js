@@ -461,19 +461,21 @@ function initModals() {
       const location = document.getElementById("listing-location-select").value;
       const price = parseInt(document.getElementById("listing-price-input").value);
       const unit = document.getElementById("listing-unit-select").value;
-      
+      const description = document.getElementById("listing-desc-input").value;
+
       submitBtn.disabled = true;
       submitBtn.innerHTML = `<svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="animation: spin 1s linear infinite; margin-right: 8px;"><circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.2)"></circle><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path></svg> Publishing...`;
-      
-      setTimeout(() => {
-        let image = "assets/Commercial Cloud Kitchen Space.jpeg";
-        if (category === "vehicles") image = "assets/Suzuki Every Mini Van (Dual AC).jpg";
-        else if (category === "equipment") image = "assets/35 kVA Soundproof Diesel Generator.jpeg";
-        else if (category === "storage") image = "assets/Secure Dry Storage Room (15x20 ft).jpeg";
-        else if (category === "parking") image = "assets/Gated Commercial Parking Space.jpg";
+
+      // Read the uploaded photos while the spinner shows (listingForm.reset() below clears them)
+      const imagesReady = getListingImages();
+      const minDelay = new Promise(resolve => setTimeout(resolve, 1500));
+
+      Promise.all([imagesReady, minDelay]).then(([images]) => {
+        // Publish to the shared marketplace so the listing appears on every page
+        const listing = publishListing({ title, category, location, price, unit, description }, images);
 
         const newListing = {
-          id: hostListings.length + 10,
+          id: listing.id,
           title: title,
           category: category,
           location: location,
@@ -483,9 +485,9 @@ function initModals() {
           earnings: 0,
           rating: 5.0,
           reviews: 0,
-          image: image
+          image: listing.image
         };
-        
+
         hostListings.unshift(newListing);
         stats.totalListings += 1;
         
@@ -505,7 +507,7 @@ function initModals() {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
         listingForm.reset();
-      }, 1500);
+      });
     });
   }
 }
