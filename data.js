@@ -703,6 +703,14 @@ function getListingTown(listing) {
   return NORTHERN_TOWNS.find(t => t.town === townName) || null;
 }
 
+// Map position for a listing: its town centre, nudged by id so listings in the same town don't overlap
+function getListingCoords(listing) {
+  const town = getListingTown(listing) || NORTHERN_TOWNS[0];
+  const angle = listing.id * 2.4; // ~golden angle spreads neighbouring ids around the centre
+  const radius = 0.004 + 0.002 * (listing.id % 3);
+  return [town.lat + radius * Math.cos(angle), town.lng + radius * Math.sin(angle)];
+}
+
 // `area` is "" (anywhere), "district:<name>" or "town:<name>", as produced by populateAreaSelect()
 function matchesArea(listing, area) {
   if (!area) return true;

@@ -1,6 +1,9 @@
 let wishlist = new Set();
 let currentBookingListing = null;
 let modalRentMode = "daily";
+let shownListings = [];    // listings currently in the results, shown in grid or map view
+let marketplaceMap = null; // Leaflet map, created the first time Map view is opened
+let mapMarkers = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   initMobileMenu();
@@ -9,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initSidebarFilters();
   initModals();
   initSort();
+  initViewToggle();
 });
 
 // 1. MOBILE DRAWER NAVIGATION
@@ -43,6 +47,11 @@ function renderMarketplace(listings) {
   const container = document.getElementById("marketplace-grid-container");
   const counter = document.getElementById("results-counter");
   if (!container) return;
+  
+  shownListings = listings;
+  if (marketplaceMap && !document.getElementById("marketplace-map").hidden) {
+    renderMapMarkers();
+  }
   
   counter.textContent = listings.length === 1 
     ? "Showing 1 shared asset" 
@@ -282,7 +291,79 @@ function sortListings(listings, criterion) {
   return listCopy; // default
 }
 
-// 6. BOOKING AND LISTING MODAL LOGIC
+// 6. GRID / MAP VIEW
+function initViewToggle() {
+  const buttons = document.querySelectorAll(".view-toggle-btn");
+  buttons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const showMap = btn.dataset.view === "map";
+      buttons.forEach(b => {
+        b.classList.toggle("active", b === btn);
+        b.setAttribute("aria-pressed", b === btn ? "true" : "false");
+      });
+      document.getElementById("marketplace-grid-container").hidden = showMap;
+      document.getElementById("marketplace-map").hidden = !showMap;
+      if (showMap) showMapView();
+    });
+  });
+}
+
+function showMapView() {
+  const mapEl = document.getElementById("marketplace-map");
+
+  // Leaflet comes from a CDN, so it is missing when offline
+  if (typeof L === "undefined") {
+    mapEl.classList.add("map-unavailable");
+    mapEl.textContent = "The map needs an internet connection. Switch back to Grid view to see the listings.";
+    return;
+  }
+
+  if (!marketplaceMap) {
+    marketplaceMap = L.map(mapEl, { scrollWheelZoom: false });
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 18,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(marketplaceMap);
+    mapMarkers = L.layerGroup().addTo(marketplaceMap);
+  }
+
+  // The map was hidden while created or resized, so let Leaflet re-measure it
+  marketplaceMap.invalidateSize();
+  renderMapMarkers();
+}
+
+function renderMapMarkers() {
+  mapMarkers.clearLayers();
+
+  const points = shownListings.map(item => {
+    const coords = getListingCoords(item);
+    const town = getListingTown(item);
+    const marker = L.marker(coords, {
+      title: item.title,
+      icon: L.divIcon({ className: "price-pin", html: `<span>LKR ${item.price.toLocaleString()}</span>`, iconSize: null })
+    });
+    marker.bindPopup(`
+      <div class="map-popup">
+        <img src="${item.image}" alt="${item.title}">
+        <h4>${item.title}</h4>
+        <p>${town ? `${town.town}, ${town.district} District` : item.location}</p>
+        <p><strong>LKR ${item.price.toLocaleString()}</strong> / ${item.unit}</p>
+        <a href="details.html?id=${item.id}" class="btn btn-sm btn-primary" style="color: white;">View details</a>
+      </div>
+    `);
+    marker.addTo(mapMarkers);
+    return coords;
+  });
+
+  if (points.length > 0) {
+    marketplaceMap.fitBounds(points, { padding: [50, 50], maxZoom: 13 });
+  } else {
+    // No results: show the whole Northern Province
+    marketplaceMap.setView([9.2, 80.4], 8);
+  }
+}
+
+// 7. BOOKING AND LISTING MODAL LOGIC
 function initModals() {
   const modalOverlays = document.querySelectorAll(".modal-overlay");
   const closeBtns = document.querySelectorAll(".modal-close");

@@ -6,6 +6,7 @@
   <title>Browse Shared Assets | Util Lanka Marketplace</title>
   <meta name="description" content="Search and rent commercial kitchens, mini vans, tuk-tuks, generators, and storage spaces in Jaffna, Vavuniya, and Kilinochchi. Premium asset-sharing in Northern Province.">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
   <style>
     /* Page Specific Layout */
     .marketplace-hero {
@@ -201,6 +202,109 @@
       font-weight: 500;
     }
     
+    /* Grid / Map view switch */
+    .results-tools {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .view-toggle {
+      display: inline-flex;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background-color: var(--bg-white);
+    }
+
+    .view-toggle-btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      background: transparent;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-light);
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .view-toggle-btn.active {
+      background-color: var(--primary-dark);
+      color: white;
+    }
+
+    .marketplace-map {
+      height: 600px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-light);
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    /* .grid-view sets display, which would otherwise override the hidden attribute */
+    .grid-view[hidden],
+    .marketplace-map[hidden] {
+      display: none;
+    }
+
+    .map-unavailable {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-light);
+    }
+
+    /* Price label used as the map marker */
+    .price-pin span {
+      display: inline-block;
+      transform: translate(-50%, -100%);
+      padding: 0.3rem 0.6rem;
+      border-radius: var(--radius-full);
+      background-color: var(--primary-dark);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      white-space: nowrap;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .price-pin:hover span {
+      background-color: var(--accent-teal);
+    }
+
+    .map-popup {
+      width: 200px;
+    }
+
+    .map-popup img {
+      width: 100%;
+      height: 110px;
+      object-fit: cover;
+      border-radius: var(--radius-sm);
+      margin-bottom: 0.5rem;
+    }
+
+    .map-popup h4 {
+      font-size: 0.9rem;
+      margin: 0 0 0.25rem;
+      color: var(--text-main);
+    }
+
+    .map-popup p {
+      margin: 0 0 0.5rem !important;
+      color: var(--text-light);
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 768px) {
+      .marketplace-map {
+        height: 420px;
+      }
+    }
+
     /* Listing Grid & Cards customization */
     .grid-view {
       display: grid;
@@ -429,19 +533,27 @@
         <main style="flex-grow: 1;">
           <div class="results-header">
             <div class="results-count" id="results-counter">Showing all assets</div>
-            <div class="sort-dropdown">
-              <select id="market-sort" aria-label="Sort listings">
-                <option value="default">Default Sort</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="rating">Highest Rated</option>
-              </select>
+            <div class="results-tools">
+              <div class="view-toggle" role="group" aria-label="Results view">
+                <button type="button" class="view-toggle-btn active" data-view="grid" aria-pressed="true">Grid</button>
+                <button type="button" class="view-toggle-btn" data-view="map" aria-pressed="false">Map</button>
+              </div>
+              <div class="sort-dropdown">
+                <select id="market-sort" aria-label="Sort listings">
+                  <option value="default">Default Sort</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                  <option value="rating">Highest Rated</option>
+                </select>
+              </div>
             </div>
           </div>
           
           <div class="grid-view" id="marketplace-grid-container">
             <!-- Rendered by marketplace.js -->
           </div>
+
+          <div class="marketplace-map" id="marketplace-map" hidden></div>
         </main>
         
       </div>
@@ -679,6 +791,7 @@
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <script src="data.js"></script>
   <script src="upload.js"></script>
   <script src="marketplace.js"></script>
