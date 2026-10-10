@@ -463,15 +463,8 @@ function publishListing({ title, category, location, price, unit, description },
     images: images,
     description: description,
     labels: ["Available Today", "New Listing"],
-    host: {
-      name: "You",
-      joined: `Joined ${now.toLocaleString("en-US", { month: "short", year: "numeric" })}`,
-      responseRate: "New host",
-      responseTime: "within a day",
-      avatar: "Y",
-      phone: "Shared after the host confirms",
-      email: "Shared after the host confirms"
-    },
+    // The demo is signed in as host Shalini Alwis (see the dashboard welcome message)
+    host: { ...BASE_LISTINGS[0].host },
     reviewsList: [],
     createdAt: now.toISOString()
   };
