@@ -225,7 +225,7 @@ function applyAllFilters() {
       item.description.toLowerCase().includes(keyword);
       
     // 2. Location (Substring Match)
-    const matchesLocation = !location || item.location.toLowerCase().includes(location.toLowerCase());
+    const matchesLocation = matchesArea(item, location);
     
     // 3. Category (Top select OR checked boxes)
     let matchesCategory = true;
@@ -251,6 +251,13 @@ function applyAllFilters() {
   filtered = sortListings(filtered, sortBy);
 
   renderMarketplace(filtered);
+
+  // Say which area the results are for, e.g. "Showing 5 shared assets in Jaffna District"
+  if (location) {
+    const locationSelect = document.getElementById("market-location");
+    const areaName = locationSelect.options[locationSelect.selectedIndex].text.replace("All of ", "");
+    document.getElementById("results-counter").textContent += ` in ${areaName}`;
+  }
 }
 
 // 5. SORTING LOGIC

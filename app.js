@@ -80,7 +80,7 @@ function initSearch() {
           item.title.toLowerCase().includes(keyword) || 
           item.description.toLowerCase().includes(keyword);
           
-        const matchesLocation = !location || item.location.toLowerCase().includes(location.toLowerCase());
+        const matchesLocation = matchesArea(item, location);
         const matchesCategory = !category || item.category === category;
         
         return matchesKeyword && matchesLocation && matchesCategory;

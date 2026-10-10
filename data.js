@@ -678,6 +678,67 @@ function addBookingRequestFromModal(listing, rentMode) {
   });
 }
 
+// ---------------------------------------------------------------------------
+// Districts and towns of the Northern Province (map coordinates are town centres)
+// ---------------------------------------------------------------------------
+
+const NORTHERN_TOWNS = [
+  { town: "Jaffna", district: "Jaffna", lat: 9.6615, lng: 80.0255 },
+  { town: "Nallur", district: "Jaffna", lat: 9.6747, lng: 80.0300 },
+  { town: "Chunnakam", district: "Jaffna", lat: 9.7469, lng: 80.0262 },
+  { town: "Chavakachcheri", district: "Jaffna", lat: 9.6580, lng: 80.1600 },
+  { town: "Point Pedro", district: "Jaffna", lat: 9.8167, lng: 80.2333 },
+  { town: "Kilinochchi", district: "Kilinochchi", lat: 9.3803, lng: 80.3770 },
+  { town: "Mannar", district: "Mannar", lat: 8.9810, lng: 79.9044 },
+  { town: "Mullaitivu", district: "Mullaitivu", lat: 9.2671, lng: 80.8142 },
+  { town: "Vavuniya", district: "Vavuniya", lat: 8.7514, lng: 80.4971 }
+];
+
+const NORTHERN_DISTRICTS = [...new Set(NORTHERN_TOWNS.map(t => t.district))];
+
+// The town is the last part of a listing's address ("No. 8, Mannar Road, Vavuniya" -> Vavuniya)
+function getListingTown(listing) {
+  const parts = listing.location.split(",");
+  const townName = parts[parts.length - 1].trim();
+  return NORTHERN_TOWNS.find(t => t.town === townName) || null;
+}
+
+// `area` is "" (anywhere), "district:<name>" or "town:<name>", as produced by populateAreaSelect()
+function matchesArea(listing, area) {
+  if (!area) return true;
+  const town = getListingTown(listing);
+  if (!town) return false;
+  const [kind, name] = area.split(":");
+  return kind === "district" ? town.district === name : town.town === name;
+}
+
+// Fills a <select> with towns grouped by district. Search selects also get a
+// whole-district option per group and keep their existing "All Locations" option.
+function populateAreaSelect(select, forSearch) {
+  if (!select) return;
+  const anyOption = forSearch ? select.querySelector('option[value=""]') : null;
+  select.innerHTML = "";
+  if (anyOption) select.appendChild(anyOption);
+
+  NORTHERN_DISTRICTS.forEach(district => {
+    const group = document.createElement("optgroup");
+    group.label = `${district} District`;
+    if (forSearch) {
+      group.appendChild(new Option(`All of ${district} District`, `district:${district}`));
+    }
+    NORTHERN_TOWNS.filter(t => t.district === district).forEach(t => {
+      group.appendChild(new Option(t.town, forSearch ? `town:${t.town}` : t.town));
+    });
+    select.appendChild(group);
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  populateAreaSelect(document.getElementById("search-location"), true);
+  populateAreaSelect(document.getElementById("market-location"), true);
+  populateAreaSelect(document.getElementById("listing-location-select"), false);
+});
+
 // Shared UI helper: not every modal has a footer (the List an Asset modal on the
 // home and marketplace pages keeps its buttons inside the form).
 function setModalFooterDisplay(modal, display) {
