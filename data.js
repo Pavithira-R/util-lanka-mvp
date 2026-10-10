@@ -486,3 +486,10 @@ function publishListing({ title, category, location, price, unit, description },
   listingsDatabase.unshift(listing);
   return listing;
 }
+
+// Shared UI helper: not every modal has a footer (the List an Asset modal on the
+// home and marketplace pages keeps its buttons inside the form).
+function setModalFooterDisplay(modal, display) {
+  const footer = modal && modal.querySelector(".modal-footer");
+  if (footer) footer.style.display = display;
+}

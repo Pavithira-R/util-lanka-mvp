@@ -442,7 +442,7 @@ function initModals() {
       const modal = document.getElementById("list-asset-modal");
       document.getElementById("listing-form-content").style.display = "block";
       document.getElementById("listing-success-content").style.display = "none";
-      modal.querySelector(".modal-footer").style.display = "flex";
+      setModalFooterDisplay(modal, "flex");
       modal.classList.add("active");
     });
   });
@@ -502,7 +502,7 @@ function initModals() {
         
         document.getElementById("listing-form-content").style.display = "none";
         document.getElementById("listing-success-content").style.display = "block";
-        document.getElementById("list-asset-modal").querySelector(".modal-footer").style.display = "none";
+        setModalFooterDisplay(document.getElementById("list-asset-modal"), "none");
         
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;

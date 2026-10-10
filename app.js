@@ -556,7 +556,7 @@ function openBookingModal(listingId) {
   // Reset form status content
   document.getElementById("booking-form-content").style.display = "block";
   document.getElementById("booking-success-content").style.display = "none";
-  modal.querySelector(".modal-footer").style.display = "flex";
+  setModalFooterDisplay(modal, "flex");
   
   modal.classList.add("active");
 }
@@ -601,7 +601,7 @@ function submitBooking() {
     // Show success content
     document.getElementById("booking-form-content").style.display = "none";
     document.getElementById("booking-success-content").style.display = "block";
-    document.getElementById("booking-modal").querySelector(".modal-footer").style.display = "none";
+    setModalFooterDisplay(document.getElementById("booking-modal"), "none");
     
     // Generate mock reference code
     const refCode = "UTL-" + Math.floor(100000 + Math.random() * 900000);
@@ -636,7 +636,7 @@ function openListAssetModal() {
   // Reset visibility state
   document.getElementById("listing-form-content").style.display = "block";
   document.getElementById("listing-success-content").style.display = "none";
-  modal.querySelector(".modal-footer").style.display = "flex";
+  setModalFooterDisplay(modal, "flex");
   
   modal.classList.add("active");
 }
@@ -672,7 +672,7 @@ function submitNewListing() {
     // Transition modal success state
     document.getElementById("listing-form-content").style.display = "none";
     document.getElementById("listing-success-content").style.display = "block";
-    document.getElementById("list-asset-modal").querySelector(".modal-footer").style.display = "none";
+    setModalFooterDisplay(document.getElementById("list-asset-modal"), "none");
     
     // Reset button
     submitBtn.disabled = false;

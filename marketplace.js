@@ -361,7 +361,7 @@ function initModals() {
       const modal = document.getElementById("list-asset-modal");
       document.getElementById("listing-form-content").style.display = "block";
       document.getElementById("listing-success-content").style.display = "none";
-      modal.querySelector(".modal-footer").style.display = "flex";
+      setModalFooterDisplay(modal, "flex");
       modal.classList.add("active");
     });
   });
@@ -380,7 +380,7 @@ function initModals() {
       setTimeout(() => {
         document.getElementById("booking-form-content").style.display = "none";
         document.getElementById("booking-success-content").style.display = "block";
-        document.getElementById("booking-modal").querySelector(".modal-footer").style.display = "none";
+        setModalFooterDisplay(document.getElementById("booking-modal"), "none");
         
         const refCode = "UTL-" + Math.floor(100000 + Math.random() * 900000);
         document.getElementById("booking-ref-code").innerHTML = `<strong>Reference ID:</strong> ${refCode}`;
@@ -437,7 +437,7 @@ function initModals() {
         
         document.getElementById("listing-form-content").style.display = "none";
         document.getElementById("listing-success-content").style.display = "block";
-        document.getElementById("list-asset-modal").querySelector(".modal-footer").style.display = "none";
+        setModalFooterDisplay(document.getElementById("list-asset-modal"), "none");
         
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
@@ -499,7 +499,7 @@ function openBookingModal(listingId) {
   
   document.getElementById("booking-form-content").style.display = "block";
   document.getElementById("booking-success-content").style.display = "none";
-  modal.querySelector(".modal-footer").style.display = "flex";
+  setModalFooterDisplay(modal, "flex");
   
   modal.classList.add("active");
 }
