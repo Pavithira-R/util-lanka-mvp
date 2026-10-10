@@ -2,6 +2,8 @@
 
 **A peer-to-peer marketplace for renting out under-used assets in Sri Lanka**: kitchens, vehicles, equipment, storage rooms and parking spaces. Owners earn from things that would otherwise sit idle, and small businesses get affordable access to what they need. The pilot covers the Northern Province.
 
+**Live demo: [pavithira-r.github.io/util-lanka-mvp](https://pavithira-r.github.io/util-lanka-mvp/)**
+
 ![Util Lanka home page](docs/screenshots/home.png)
 
 ## Features
@@ -20,7 +22,7 @@
 
 ## Try it
 
-There is no build step and nothing to install.
+Open the [live demo](https://pavithira-r.github.io/util-lanka-mvp/), or run it locally. There is no build step and nothing to install.
 
 1. Clone the repo:
    ```bash
