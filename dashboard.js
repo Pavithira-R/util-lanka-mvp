@@ -144,6 +144,37 @@ if (!localStorage.getItem("completedBookings")) localStorage.setItem("completedB
 if (!localStorage.getItem("dashboardStats")) localStorage.setItem("dashboardStats", JSON.stringify(stats));
 if (!localStorage.getItem("dashboardNotifications")) localStorage.setItem("dashboardNotifications", JSON.stringify(notifications));
 
+// Listings published from the home, marketplace or details pages belong to this host too
+syncPublishedListings();
+
+function syncPublishedListings() {
+  const missing = loadUserListings().filter(listing => !hostListings.some(item => item.id === listing.id));
+  if (missing.length === 0) return;
+
+  // loadUserListings() is newest first; add oldest first so the newest ends up on top
+  missing.reverse().forEach(listing => {
+    hostListings.unshift({
+      id: listing.id,
+      title: listing.title,
+      category: listing.category,
+      location: listing.location,
+      price: listing.price,
+      unit: listing.unit,
+      status: "Active",
+      earnings: 0,
+      rating: listing.rating,
+      reviews: listing.reviews,
+      image: listing.image
+    });
+    stats.totalListings += 1;
+    notifications.unshift({ time: "Just now", text: `Published new listing: ${listing.title}` });
+  });
+
+  localStorage.setItem("hostListings", JSON.stringify(hostListings));
+  localStorage.setItem("dashboardStats", JSON.stringify(stats));
+  localStorage.setItem("dashboardNotifications", JSON.stringify(notifications));
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   initMobileMenu();
   renderStats();
